@@ -1,0 +1,1426 @@
+<html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jogo de Damas</title>
+  <meta name="theme-color" content="#8B2500" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body { 
+      /* Estilo do corpo da página */
+      background-image: url('image/Dama11.jpg');
+      font-family: Arial, sans-serif; 
+      text-align: center; 
+      background-color: #f7f7f7; 
+      background-size: cover; 
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      user-select: none;
+      -webkit-user-select: none;
+      overscroll-behavior: none;
+    }
+    button { 
+      /* Estilo dos botões */
+      background-color: #A0522D;
+      border: 3px solid #696969;
+      color: #080808;
+      width: 150px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.1s ease-in-out;
+      min-height: 44px; /* Acessível para toque */
+    }
+    h2 {
+      /* Estilo do título de login */
+      color: #faf9f8;
+      font-size: 30px;   
+    }
+    h3 {
+      /* Estilo do indicador de turno - chip suave */
+      background: rgba(255,255,255,0.12);
+      width: fit-content;
+      margin: 8px auto 14px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    }
+    #login-container {
+      /* Estilo do contêiner de login */
+      margin: 0;
+      width: 100vw;
+      height: 100vh;    
+      box-sizing: border-box;
+      border: 30px solid #8B2500;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    #login-container::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(139,37,0,0.35), transparent 60%),
+                  radial-gradient(1200px 600px at 90% 90%, rgba(0,0,0,0.35), transparent 60%),
+                  linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.55));
+      pointer-events: none;
+    }
+    .login-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 28px;
+      align-items: center;
+      width: min(1100px, 92vw);
+      margin: auto;
+      padding: 24px 10px;
+      z-index: 1;
+    }
+    .hero {
+      text-align: left;
+      color: #fff;
+      padding: 8px 6px;
+    }
+    .hero h1 {
+      margin: 0 0 8px 0;
+      font-size: clamp(26px, 4.5vw, 44px);
+      line-height: 1.08;
+      letter-spacing: 0.2px;
+      text-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    }
+    .hero p {
+      margin: 0 0 14px 0;
+      font-size: clamp(14px, 2.2vw, 18px);
+      color: #f3ece6;
+      opacity: .95;
+    }
+    .hero ul { list-style: none; padding: 0; margin: 14px 0 18px; }
+    .hero li { margin: 8px 0; display: flex; align-items: center; gap: 8px; color: #f7f4f1; opacity: .95; }
+    .hero li::before { content: "✔"; color: #ffd27a; font-weight: bold; }
+    .hero .cta {
+      display: inline-block;
+      background: #8B2500;
+      color: #fff;
+      border: 0;
+      padding: 12px 18px;
+      border-radius: 12px;
+      box-shadow: 0 10px 18px rgba(0,0,0,0.25);
+      cursor: pointer;
+      transition: transform .08s ease, filter .2s ease;
+      min-height: 44px;
+    }
+    .hero .cta:hover { filter: brightness(1.06); }
+    .hero .cta:active { transform: translateY(1px); }
+    .content {
+      /* Card de login (glass) */
+      position: relative;
+      top: auto;
+      left: auto;
+      transform: none;  
+      width: min(92vw, 420px);
+      padding: 24px 22px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.08);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .content input {
+      /* Estilo dos campos de entrada */
+      background-color: rgba(231, 203, 169, 0.9);
+      display: block;
+      margin: 10px auto;
+      padding: 12px 14px;
+      width: 100%;
+      max-width: none;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.15);
+      outline: none;
+    }
+    .content button {
+      /* Estilo dos botões no contêiner de login */
+      background-color: #8B2500;
+      border: 0;
+      margin: 8px 0 0 0;
+      padding: 12px 14px;
+      color: #f8f5f5; 
+      width: 100%;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform .06s ease, box-shadow .2s ease, background .2s ease;
+      border-radius: 10px;
+    }
+    .content button:hover { filter: brightness(1.05); }
+    .content button:active { transform: translateY(1px); }
+    .content label {
+      /* Estilo dos rótulos no login */
+      color: #faf9f8;
+      font-size: 16px;
+      margin: 10px auto 4px;
+      text-align: left;
+      width: 100%;
+    }
+    .content .subtitle { color: #f0e9e3; opacity: .9; margin-top: -6px; margin-bottom: 14px; }
+    #turno { 
+      /* Estilo do texto de turno */
+      font-size: 24px; 
+      font-weight: bold; 
+    }
+    .controls, .login { 
+      /* Margem para controles e login */
+      margin: 20px; 
+    }
+    #jogo-container {
+      /* Estilo do contêiner do jogo */
+      margin: auto;
+      width: 100vw;
+      height: 100vh;
+      padding: auto;
+      width: fit-content;
+    }
+    .controls {
+      /* Estilo do painel de controles - versão suave */
+      background: rgba(255,255,255,0.08);
+      text-align: center;
+      align-items: center;
+      padding: 16px 18px;
+      width: fit-content;
+      margin: 16px auto 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .controls label { 
+      /* Estilo dos rótulos nos controles */
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      color: #f7f4f1;
+      margin: 6px 4px;
+      align-items: center;
+    }
+    .controls button { 
+      /* Estilo dos botões nos controles */
+      background: linear-gradient(180deg, #A0522D, #8B4513);
+      border: 0;
+      color: #fff;
+      margin: 12px 6px 0 6px;
+      width: 140px;
+      padding: 10px 12px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .08s ease, filter .2s ease;
+      border-radius: 10px;
+    }
+    .controls button:hover { filter: brightness(1.06); }
+    .controls button:active { transform: translateY(1px); }
+    button:active {
+      /* Efeito ao clicar nos botões */
+      box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
+      transform: translateY(2px);
+    }
+    .controls select { 
+      /* Estilo dos seletores nos controles */
+      background: rgba(160, 82, 45, 0.85);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      margin: 2px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      outline: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2) inset;
+    }
+    .tabuleiro { 
+      /* Estilo do tabuleiro */
+      display: grid; 
+      grid-template-columns: repeat(8, 60px); 
+      margin: 0 auto; 
+      width: 480px; 
+      border: 8px solid rgba(187, 4, 4, 0.85);
+      border-radius: 14px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+      overflow: hidden;
+      touch-action: manipulation;
+      backdrop-filter: blur(2px);
+    }
+    .peca.animando {
+      position: absolute;
+      z-index: 10;
+      transition: transform 0.4s cubic-bezier(.4,2,.6,1);
+      pointer-events: none;
+    }
+    .casa {
+      /* Estilo das casas do tabuleiro */
+      width: 60px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      
+    }
+    .clara { background-color: #eee; }
+    .escura { background-color: #444; }
+    .peca {
+      /* Estilo das peças */
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      box-shadow: inset 0 6px 10px rgba(0,0,0,0.25), 0 4px 10px rgba(0,0,0,0.25);
+    }
+    .dama::after {
+      /* Estilo do símbolo de dama */
+      content: "👑";
+      position: absolute;
+      font-size: 20px;
+      color: yellow;
+    }
+    .selecionada { outline: 3px solid yellow; } /* Casa selecionada */
+    .possivel { background-color: green !important; } /* Casa de movimento possível */
+    #login-container, #jogo-container { display: none; } /* Inicialmente escondidos */
+    #login-container.active, #jogo-container.active { display: block; } /* Exibe quando ativo */
+    .nivel-bloqueado { 
+      /* Estilo de níveis bloqueados */
+      background-color: #A0522D;
+      cursor: not-allowed; 
+    }
+    /* Botão de instalar PWA */
+    #btn-instalar {
+      position: fixed;
+      right: calc(env(safe-area-inset-right) + 12px);
+      bottom: calc(env(safe-area-inset-bottom) + 12px);
+      z-index: 1000;
+      display: none;
+    }
+/* ================== MEDIA QUERIES ================== */
+
+  @media screen and (max-width: 768px) {
+    body {
+      background-image: url('image/Dama11.png') !important;
+      background-attachment: scroll;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    #login-container { width: 100vw; height: 100vh; border-width: 3vw; border-radius: 10px; }
+
+    h2 { 
+      font-size: 1.5rem; }
+    h3 { 
+      font-size: 1rem; width: 70%; }
+    .content { width: 94%; padding: 18px 16px; }
+    .content input, .content button {
+      width: 100%;
+      max-width: none;
+      margin: 8px auto;
+      display: block;
+    }
+    .tabuleiro {
+      grid-template-columns: repeat(8, 11fr);
+      width: 96vw;
+      min-width: 0;
+    }
+    .casa {
+      width: 12vw;
+      height: 12vw;
+      min-width: 30px;
+      min-height: 30px;
+    }
+    .peca {
+      width: 65%;
+      height: 65%;
+      min-width: 18px;
+      min-height: 18px;
+    }
+}
+
+  </style>
+</head>
+<body>
+  <!-- Áudios -->
+  <audio id="som-captura" src="audio/captura.mp3"></audio>
+  <audio id="som-distribuicao" src="audio/distribuicao.mp3"></audio>
+  <audio id="som-movimento" src="audio/movimento.mp3"></audio>
+  <audio id="som-vitoria" src="audio/vitoria.mp3"></audio>
+  <audio id="som-click" src="audio/click.mp3"></audio>
+  <audio id="musica-fundo" src="audio/drama.mp3" loop></audio>
+
+
+  <!-- Contêiner de login -->
+  <div id="login-container" class="login active">
+    <div class="login-grid">
+      <section class="hero">
+        <h1>Clássico, elegante e desafiador</h1>
+        <p>Personalize o tabuleiro, jogue localmente ou contra a máquina com níveis progressivos.</p>
+        <ul>
+          <li>Temas de madeira e peças personalizáveis</li>
+          <li>Animações suaves e efeitos sonoros</li>
+          <li>Modo IA com 10 níveis e progresso salvo</li>
+        </ul>
+        <button class="cta" id="btn-cta">Jogar agora</button>
+      </section>
+      <div class="content">
+        <h2>Entrar no jogo</h2>
+        <p class="subtitle">Crie sua conta para salvar progresso</p>
+        <label>Usuário:<input type="text" id="username" placeholder="Seu nome"></label>
+        <label>Senha: <input type="password" id="password" placeholder="Mínimo 6 caracteres"></label><br/>
+        <button id="btn-entrar">Entrar</button>     
+        <button id="btn-cadastrar">Cadastrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contêiner do jogo -->
+  <div id="jogo-container">
+    <h1><button onclick="alternarMenu()">Opções de Jogo</button></h1>
+    <div class="controls" id="menu">
+      <label>Jogador 1:
+        <select id="corJ1">
+          <option>Jatobá</option>
+          <option>Castanho</option>
+          <option>Verde</option>
+          <option>Vermelho</option>
+          <option>Preta</option>
+          <option>Imbuia</option>
+        </select>
+      </label>
+      <label>Jogador 2:
+        <select id="corJ2">
+          <option>Castanho</option>
+          <option>Jatobá</option>
+          <option>Verde</option>
+          <option>Vermelho</option>
+          <option>Preta</option>
+          <option>Imbuia</option>
+        </select>
+      </label>
+      <label>Tabuleiro:
+        <select id="temaTabuleiro">
+          <option>Preto-Castanho</option>
+          <option>Preto-Branco</option>
+          <option>Teca-Nogueira</option>
+          <option>Preto-Teca</option>
+          <option>Teca-Carvalho</option>
+        </select>
+      </label>
+      <label>Adversário:
+        <select id="modoJogo">
+          <option>Jogador Local</option>
+          <option>Contra a Máquina</option>
+        </select>
+      </label>
+      <label>Dificuldade:
+        <select id="nivelDificuldade">
+          <option value="1">Nível 1</option>
+          <option value="2">Nível 2</option>
+          <option value="3">Nível 3</option>
+          <option value="4">Nível 4</option>
+          <option value="5">Nível 5</option>
+          <option value="6">Nível 6</option>
+          <option value="7">Nível 7</option>
+          <option value="8">Nível 8</option>
+          <option value="9">Nível 9</option>
+          <option value="10">Nível 10</option>
+        </select>
+      </label>
+      <button onclick="iniciarJogo()">Iniciar Jogo</button>
+      <button onclick="reiniciarJogo()">Reiniciar Jogo</button>
+    </div>
+    <h3 id="turno"></h3>
+    <div id="tabuleiro" class="tabuleiro"></div>
+  </div>
+  <div id="confete-container" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:999;display:none;"></div>
+  <button id="btn-instalar">Instalar App</button>
+
+  <script>
+
+    // === Funções de Utilidade ===
+    window.onload = function() {
+      document.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => tocarSom("som-click"));
+      });
+      // PWA: registro do service worker
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      }
+      inicializarPWA();
+    };
+    // === PWA Instalação ===
+    let eventoInstalacaoDeferido = null;
+    function inicializarPWA() {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        eventoInstalacaoDeferido = e;
+        const btn = document.getElementById('btn-instalar');
+        btn.style.display = 'block';
+        btn.onclick = async () => {
+          btn.disabled = true;
+          try {
+            if (eventoInstalacaoDeferido) {
+              eventoInstalacaoDeferido.prompt();
+              const { outcome } = await eventoInstalacaoDeferido.userChoice;
+              if (outcome === 'accepted') btn.style.display = 'none';
+              eventoInstalacaoDeferido = null;
+            }
+          } finally {
+            btn.disabled = false;
+          }
+        };
+      });
+      window.addEventListener('appinstalled', () => {
+        const btn = document.getElementById('btn-instalar');
+        btn.style.display = 'none';
+      });
+    }
+
+    // === Variáveis globais ===
+    let tabuleiro = [];
+    let turnoJogador = 1;
+    let pecaSelecionada = null;
+    let cores = { "Imbuia": "#7F5A36", "Preta": "#000", "Jatobá": "#8B4000", "Castanho": "#6F4E37", "Verde": "green", "Vermelho": "red" };
+    let temaCores = { "Preto-Branco": ["#000", "#fff"], "Preto-Castanho": ["#000", "#A47149"], "Teca-Nogueira": ["#8B2500", "#B98E68"], "Preto-Teca": ["#000", "#8B2500"], "Teca-Carvalho": ["#8B2500", "#D6A77A"] };
+    let corPecas = {};
+    let corCasas = [];
+    let capturaObrigatoria = false;
+    let modo = "";
+    let nivel = 1;
+    let turnoDaIA = false;
+    let usuarioAtual = null;
+
+    // Array para armazenar usuários e senhas (limite de 10 linhas)
+    let usuarios = [
+      { usuario: "", senha: "" },
+      { usuario: "", senha: "" },
+      { usuario: "", senha: "" },
+      { usuario: "", senha: "" },
+      { usuario: "", senha: "" },
+      { usuario: "", senha: "" },
+      { usuario: "", senha: "" },
+      { usuario: "", senha: "" },
+      { usuario: "", senha: "" },
+      { usuario: "", senha: "" }
+    ];
+
+    // Funções de login e cadastro
+    function carregarUsuarios() {
+      try {
+        const salvo = localStorage.getItem('usuarios_damas');
+        if (salvo) {
+          const lista = JSON.parse(salvo);
+          // Garante 10 posições
+          while (lista.length < 10) lista.push({ usuario: "", senha: "" });
+          usuarios = lista.slice(0, 10);
+        } else {
+          // Inicializa 10 posições vazias
+          usuarios = [
+            { usuario: "", senha: "" },
+            { usuario: "", senha: "" },
+            { usuario: "", senha: "" },
+            { usuario: "", senha: "" },
+            { usuario: "", senha: "" },
+            { usuario: "", senha: "" },
+            { usuario: "", senha: "" },
+            { usuario: "", senha: "" },
+            { usuario: "", senha: "" },
+            { usuario: "", senha: "" }
+          ];
+          localStorage.setItem('usuarios_damas', JSON.stringify(usuarios));
+        }
+      } catch (e) {
+        // Em caso de erro, mantém o array em memória
+      }
+      return usuarios;
+    }
+
+    function salvarUsuarios(novosUsuarios = null) {
+      try {
+        if (Array.isArray(novosUsuarios)) usuarios = novosUsuarios;
+        localStorage.setItem('usuarios_damas', JSON.stringify(usuarios));
+      } catch (e) {
+        // Silencia erros de armazenamento
+      }
+    }
+
+    function cadastrarUsuario() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!username || !password) {
+        alert('Por favor, preencha usuário e senha.');
+        return;
+      }
+      if (username.length < 3 || password.length < 6) {
+        alert('Usuário deve ter pelo menos 3 caracteres e senha 6 caracteres.');
+        return;
+      }
+
+      let usuariosArray = carregarUsuarios();
+      if (usuariosArray.some(user => user.usuario === username)) {
+        alert('Usuário já existe. Tente outro nome.');
+        return;
+      }
+
+      // Procura a primeira posição vazia no array
+      for (let i = 0; i < usuariosArray.length; i++) {
+        if (!usuariosArray[i].usuario && !usuariosArray[i].senha) {
+          usuariosArray[i] = { usuario: username, senha: btoa(password) };
+          salvarUsuarios(usuariosArray);
+          alert('Usuário cadastrado com sucesso! Faça login.');
+          return;
+        }
+      }
+      alert('Limite de 10 usuários atingido.');
+    }
+
+    function loginUsuario() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!username || !password) {
+        alert('Por favor, preencha usuário e senha.');
+        return;
+      }
+
+      let usuariosArray = carregarUsuarios();
+      const usuario = usuariosArray.find(user => user.usuario === username && user.senha === btoa(password));
+      if (usuario) {
+        usuarioAtual = username;
+        atualizarNiveisDesbloqueados();
+        document.getElementById('login-container').classList.remove('active');
+        document.getElementById('jogo-container').classList.add('active');
+        localStorage.setItem('session', JSON.stringify({ username, timestamp: new Date().toISOString() }));
+        // Restaurar preferências de UI do usuário, se existirem
+        restaurarPreferenciasUI();
+      } else {
+        alert('Usuário ou senha inválidos.');
+      }
+    }
+
+// Atualiza os níveis desbloqueados com base no usuário atual
+    function atualizarNiveisDesbloqueados() {
+      let usuariosArray = carregarUsuarios();
+      let idx = usuariosArray.findIndex(u => u.usuario === usuarioAtual);
+      // Se não encontrar, mantém 1 desbloqueado
+      let nivelDesbloqueado = 1;
+      if (idx !== -1) {
+        nivelDesbloqueado = usuariosArray[idx].nivelDesbloqueado ?? 1;
+      }
+      const selectNivel = document.getElementById('nivelDificuldade');
+      for (let i = 0; i < selectNivel.options.length; i++) {
+        const nivelOpcao = parseInt(selectNivel.options[i].value);
+        if (nivelOpcao > nivelDesbloqueado) {
+          selectNivel.options[i].disabled = true;
+          selectNivel.options[i].classList.add('nivel-bloqueado');
+        } else {
+          selectNivel.options[i].disabled = false;
+          selectNivel.options[i].classList.remove('nivel-bloqueado');
+        }
+      }
+    }
+// Desbloqueia o próximo nível após vencer
+ function desbloquearProximoNivel() {
+  let usuarios = carregarUsuarios();
+  let idx = usuarios.findIndex(u => u.usuario === usuarioAtual);
+  if (idx !== -1) {
+    // Nível jogado atualmente
+    const nivelAtual = parseInt(document.getElementById('nivelDificuldade').value);
+    // Próximo nível a ser desbloqueado
+    const proximoNivel = nivelAtual + 1;
+    // Só desbloqueia se o próximo nível for maior que o já desbloqueado
+    if ((usuarios[idx].nivelDesbloqueado ?? 1) < proximoNivel && proximoNivel <= 10) {
+      usuarios[idx].nivelDesbloqueado = proximoNivel;
+      salvarUsuarios(usuarios);
+      atualizarNiveisDesbloqueados();
+      alert('Nível ' + proximoNivel + ' desbloqueado!');
+    } else {
+      // Já está desbloqueado ou não há mais níveis
+      alert('Nada a desbloquear!');
+    }
+  }
+}
+
+
+    // === Lógica do Jogo ===
+
+    // Verifica se uma posição está dentro dos limites do tabuleiro (8x8)
+    function estaDentroDosLimites(i, j) {
+      return i >= 0 && i < 8 && j >= 0 && j < 8;
+    }
+
+    // Obtém movimentos regulares (não-capturas) possíveis para uma peça
+    function obterMovimentosRegularesPossiveis(i, j) {
+      let peca = tabuleiro[i][j];
+      let movimentos = [];
+      // Define direções com base no jogador: Jogador 1 (para cima), Jogador 2 (para baixo), damas (todas direções)
+      let direcoes = peca.dama ? [[-1,-1], [-1,1], [1,-1], [1,1]] : 
+        (peca.jogador === 1 ? [[-1,-1], [-1,1]] : [[1,-1], [1,1]]);
+      
+      for (let dir of direcoes) {
+        let di = dir[0], dj = dir[1];
+        let ni = i + di, nj = j + dj;
+        if (peca.dama) {
+          // Damas podem se mover várias casas na mesma direção
+          while (estaDentroDosLimites(ni, nj) && !tabuleiro[ni][nj]) {
+            movimentos.push({i: ni, j: nj});
+            ni += di;
+            nj += dj;
+          }
+        } else if (estaDentroDosLimites(ni, nj) && !tabuleiro[ni][nj]) {
+          // Peças regulares movem-se apenas uma casa
+          movimentos.push({i: ni, j: nj});
+        }
+      }
+      return movimentos;
+    }
+
+    // Obtém capturas possíveis para uma peça, permitindo capturas em qualquer direção diagonal
+    function obterCapturasPossiveis(i, j) {
+      let peca = tabuleiro[i][j];
+      let capturas = [];
+      // Peças regulares e damas podem capturar em todas as direções diagonais
+      let direcoes = [[-1,-1], [-1,1], [1,-1], [1,1]];
+
+      for (let dir of direcoes) {
+        let di = dir[0], dj = dir[1];
+        let ni = i + di, nj = j + dj;
+        if (peca.dama) {
+          // Damas podem capturar em várias casas na mesma direção
+          while (estaDentroDosLimites(ni, nj)) {
+            if (tabuleiro[ni][nj] && tabuleiro[ni][nj].jogador !== peca.jogador) {
+              let mi = ni + di, mj = nj + dj;
+              while (estaDentroDosLimites(mi, mj) && !tabuleiro[mi][mj]) {
+                capturas.push({i: mi, j: mj, capturadaI: ni, capturadaJ: nj});
+                mi += di;
+                mj += dj;
+              }
+              break;
+            }
+            if (tabuleiro[ni][nj]) break;
+            ni += di;
+            nj += dj;
+          }
+        } else {
+          // Peças regulares capturam pulando uma casa com peça inimiga para uma casa vazia
+          let mi = i + 2 * di, mj = j + 2 * dj;
+          if (estaDentroDosLimites(ni, nj) && estaDentroDosLimites(mi, mj) &&
+              tabuleiro[ni][nj] && tabuleiro[ni][nj].jogador !== peca.jogador && !tabuleiro[mi][mj]) {
+            capturas.push({i: mi, j: mj, capturadaI: ni, capturadaJ: nj});
+          }
+        }
+      }
+      return capturas;
+    }
+
+    // Verifica se há capturas possíveis para um jogador
+    function temCapturasPossiveis(jogador) {
+      for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+          if (tabuleiro[i][j] && tabuleiro[i][j].jogador === jogador) {
+            let capturas = obterCapturasPossiveis(i, j);
+            if (capturas.length > 0) return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    // Obtém todos os movimentos possíveis para um jogador, priorizando capturas
+    function obterTodosMovimentosPossiveis(jogador) {
+      let movimentosPossiveis = [];
+      for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+          if (tabuleiro[i][j] && tabuleiro[i][j].jogador === jogador) {
+            let capturas = obterCapturasPossiveis(i, j);
+            let movimentos = temCapturasPossiveis(jogador) ? capturas : capturas.concat(obterMovimentosRegularesPossiveis(i, j));
+            movimentos.forEach(mov => {
+              movimentosPossiveis.push({ de: {i, j}, para: mov });
+            });
+          }
+        }
+      }
+      return movimentosPossiveis;
+    }
+
+    // Obtém movimentos possíveis para uma peça específica, priorizando capturas
+    function obterTodosMovimentos(i, j) {
+      let capturas = obterCapturasPossiveis(i, j);
+      return temCapturasPossiveis(tabuleiro[i][j].jogador) ? capturas : capturas.concat(obterMovimentosRegularesPossiveis(i, j));
+    }
+
+    // Avalia o estado do tabuleiro para a IA, atribuindo pontuações
+    function avaliarTabuleiro(tabuleiroParam, jogador) {
+      let pontuacao = 0;
+      let oponente = jogador === 1 ? 2 : 1;
+      let pecasJogador = 0, pecasOponente = 0;
+      let damasJogador = 0, damasOponente = 0;
+      let centroJogador = 0;
+
+      for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+          if (tabuleiroParam[i][j]) {
+            if (tabuleiroParam[i][j].jogador === jogador) {
+              pecasJogador++;
+              if (tabuleiroParam[i][j].dama) damasJogador++;
+              if (i >= 2 && i <= 5 && j >= 2 && j <= 5) centroJogador++;
+            } else {
+              pecasOponente++;
+              if (tabuleiroParam[i][j].dama) damasOponente++;
+            }
+          }
+        }
+      }
+
+      pontuacao += pecasJogador * 10;
+      pontuacao -= pecasOponente * 10;
+      pontuacao += damasJogador * 50;
+      pontuacao -= damasOponente * 50;
+      pontuacao += centroJogador * 5;
+      return pontuacao;
+    }
+
+    // Aplica um movimento no tabuleiro para simulação da IA
+    function aplicarMovimento(tabuleiroParam, movimento) {
+      let novoTabuleiro = tabuleiroParam.map(row => row.map(cell => cell ? { ...cell } : null));
+      let { de, para } = movimento;
+      novoTabuleiro[para.i][para.j] = novoTabuleiro[de.i][de.j];
+      novoTabuleiro[de.i][de.j] = null;
+      if (para.capturadaI !== undefined && para.capturadaJ !== undefined) {
+        novoTabuleiro[para.capturadaI][para.capturadaJ] = null;
+      }
+      // Coroação só ocorre se não houver capturas adicionais possíveis na posição final
+      if (!obterCapturasPossiveisSim(novoTabuleiro, para.i, para.j).length && 
+          ((novoTabuleiro[para.i][para.j].jogador === 1 && para.i === 0) ||
+           (novoTabuleiro[para.i][para.j].jogador === 2 && para.i === 7))) {
+        novoTabuleiro[para.i][para.j].dama = true;
+      }
+      return novoTabuleiro;
+    }
+
+    // Versões "simuladas" que operam sobre um tabuleiro fornecido
+    function obterCapturasPossiveisSim(tabuleiroParam, i, j) {
+      let peca = tabuleiroParam[i][j];
+      if (!peca) return [];
+      let capturas = [];
+      let direcoes = [[-1,-1], [-1,1], [1,-1], [1,1]];
+      for (let dir of direcoes) {
+        let di = dir[0], dj = dir[1];
+        let ni = i + di, nj = j + dj;
+        if (peca.dama) {
+          while (estaDentroDosLimites(ni, nj)) {
+            if (tabuleiroParam[ni][nj] && tabuleiroParam[ni][nj].jogador !== peca.jogador) {
+              let mi = ni + di, mj = nj + dj;
+              while (estaDentroDosLimites(mi, mj) && !tabuleiroParam[mi][mj]) {
+                capturas.push({i: mi, j: mj, capturadaI: ni, capturadaJ: nj});
+                mi += di; mj += dj;
+              }
+              break;
+            }
+            if (tabuleiroParam[ni][nj]) break;
+            ni += di; nj += dj;
+          }
+        } else {
+          let mi = i + 2 * di, mj = j + 2 * dj;
+          if (estaDentroDosLimites(ni, nj) && estaDentroDosLimites(mi, mj) &&
+              tabuleiroParam[ni][nj] && tabuleiroParam[ni][nj].jogador !== peca.jogador && !tabuleiroParam[mi][mj]) {
+            capturas.push({i: mi, j: mj, capturadaI: ni, capturadaJ: nj});
+          }
+        }
+      }
+      return capturas;
+    }
+
+    function obterMovimentosRegularesPossiveisSim(tabuleiroParam, i, j) {
+      let peca = tabuleiroParam[i][j];
+      if (!peca) return [];
+      let movimentos = [];
+      let direcoes = peca.dama ? [[-1,-1], [-1,1], [1,-1], [1,1]] : 
+        (peca.jogador === 1 ? [[-1,-1], [-1,1]] : [[1,-1], [1,1]]);
+      for (let dir of direcoes) {
+        let di = dir[0], dj = dir[1];
+        let ni = i + di, nj = j + dj;
+        if (peca.dama) {
+          while (estaDentroDosLimites(ni, nj) && !tabuleiroParam[ni][nj]) {
+            movimentos.push({i: ni, j: nj});
+            ni += di; nj += dj;
+          }
+        } else if (estaDentroDosLimites(ni, nj) && !tabuleiroParam[ni][nj]) {
+          movimentos.push({i: ni, j: nj});
+        }
+      }
+      return movimentos;
+    }
+
+    function temCapturasPossiveisSim(tabuleiroParam, jogador) {
+      for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+          if (tabuleiroParam[i][j] && tabuleiroParam[i][j].jogador === jogador) {
+            let capturas = obterCapturasPossiveisSim(tabuleiroParam, i, j);
+            if (capturas.length > 0) return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    function obterTodosMovimentosPossiveisSim(tabuleiroParam, jogador) {
+      let movimentosPossiveis = [];
+      let capturasObrigatorias = temCapturasPossiveisSim(tabuleiroParam, jogador);
+      for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+          if (tabuleiroParam[i][j] && tabuleiroParam[i][j].jogador === jogador) {
+            let capturas = obterCapturasPossiveisSim(tabuleiroParam, i, j);
+            let movimentos = capturasObrigatorias ? capturas : capturas.concat(obterMovimentosRegularesPossiveisSim(tabuleiroParam, i, j));
+            movimentos.forEach(mov => movimentosPossiveis.push({ de: {i, j}, para: mov }));
+          }
+        }
+      }
+      return movimentosPossiveis;
+    }
+
+    // Algoritmo Minimax para níveis avançados da IA
+    function minimax(tabuleiroParam, profundidade, jogador, alpha, beta) {
+      if (profundidade === 0) {
+        return { pontuacao: avaliarTabuleiro(tabuleiroParam, 2) };
+      }
+      let movimentos = obterTodosMovimentosPossiveisSim(tabuleiroParam, jogador);
+      if (movimentos.length === 0) {
+        return { pontuacao: jogador === 2 ? -Infinity : Infinity };
+      }
+      let melhorMovimento = null;
+      if (jogador === 2) {
+        let melhorPontuacao = -Infinity;
+        for (let movimento of movimentos) {
+          let novoTabuleiro = aplicarMovimento(tabuleiroParam, movimento);
+          let resultado = minimax(novoTabuleiro, profundidade - 1, jogador === 1 ? 2 : 1, alpha, beta);
+          if (resultado.pontuacao > melhorPontuacao) {
+            melhorPontuacao = resultado.pontuacao;
+            melhorMovimento = movimento;
+          }
+          alpha = Math.max(alpha, melhorPontuacao);
+          if (beta <= alpha) break;
+        }
+        return { pontuacao: melhorPontuacao, movimento: melhorMovimento };
+      } else {
+        let melhorPontuacao = Infinity;
+        for (let movimento of movimentos) {
+          let novoTabuleiro = aplicarMovimento(tabuleiroParam, movimento);
+          let resultado = minimax(novoTabuleiro, profundidade - 1, jogador === 1 ? 2 : 1, alpha, beta);
+          if (resultado.pontuacao < melhorPontuacao) {
+            melhorPontuacao = resultado.pontuacao;
+            melhorMovimento = movimento;
+          }
+          beta = Math.min(beta, melhorPontuacao);
+          if (beta <= alpha) break;
+        }
+        return { pontuacao: melhorPontuacao, movimento: melhorMovimento };
+      }
+    }
+
+    // Executa a jogada da IA com base no nível de dificuldade
+    function jogadaDaIA() {
+      if (modo !== "Contra a Máquina" || turnoJogador !== 2 || turnoDaIA) return;
+      turnoDaIA = true;
+      document.getElementById("tabuleiro").style.pointerEvents = "none";
+      setTimeout(() => {
+        let movimentos;
+        if (pecaSelecionada) {
+          // Considera apenas movimentos da peça selecionada, priorizando capturas
+          movimentos = obterTodosMovimentos(pecaSelecionada.i, pecaSelecionada.j).map(mov => ({ de: pecaSelecionada, para: mov }));
+        } else {
+          // Obtém todos os movimentos possíveis para o Jogador 2
+          movimentos = obterTodosMovimentosPossiveis(2);
+        }
+        if (!movimentos || movimentos.length === 0) {
+          turnoDaIA = false;
+          document.getElementById("tabuleiro").style.pointerEvents = "auto";
+          verificarVitoria();
+          return;
+        }
+        let movimentoEscolhido;
+        if (nivel <= 3) {
+          // Níveis baixos: escolha aleatória, priorizando capturas
+          let capturas = movimentos.filter(m => m.para.capturadaI !== undefined);
+          if (capturas.length > 0) {
+            movimentoEscolhido = capturas[Math.floor(Math.random() * capturas.length)];
+          } else {
+            movimentoEscolhido = movimentos[Math.floor(Math.random() * movimentos.length)];
+          }
+        } else if (nivel <= 6) {
+          // Níveis médios: escolhe com base em pontuação simples
+          movimentoEscolhido = movimentos.reduce((melhor, mov) => {
+            let pontuacao = 0;
+            if (mov.para.capturadaI !== undefined) pontuacao += nivel === 6 ? 100 : 50;
+            // Bônus por coroação iminente (jogador 2 chegando à última linha)
+            if (mov.de && typeof mov.de.i === 'number' && mov.para && typeof mov.para.i === 'number') {
+              const pecaOrigem = tabuleiro[mov.de.i][mov.de.j];
+              if (pecaOrigem && !pecaOrigem.dama && pecaOrigem.jogador === 2 && mov.para.i === 7) {
+                pontuacao += 30;
+              }
+            }
+            if (nivel >= 5) {
+              let novoTabuleiro = aplicarMovimento(tabuleiro, mov);
+              let capturasOponente = obterTodosMovimentosPossiveisSim(novoTabuleiro, 1).filter(m => m.para.capturadaI !== undefined);
+              pontuacao -= capturasOponente.length * 10;
+            }
+            return !melhor || pontuacao > melhor.pontuacao ? { movimento: mov, pontuacao } : melhor;
+          }, null)?.movimento;
+        } else {
+          // Níveis altos: usa Minimax com profundidade variável
+          let profundidade = nivel === 7 ? 2 : nivel === 8 ? 3 : nivel === 9 ? 4 : 5;
+          let resultado = minimax(tabuleiro, profundidade, 2, -Infinity, Infinity);
+          movimentoEscolhido = resultado.movimento;
+        }
+        if (!movimentoEscolhido) {
+          turnoDaIA = false;
+          document.getElementById("tabuleiro").style.pointerEvents = "auto";
+          verificarVitoria();
+          return;
+        }
+        let { de, para } = movimentoEscolhido;
+        pecaSelecionada = de;
+        destacarSelecionada(de.i, de.j);
+        mostrarMovimentosPossiveis(de.i, de.j);
+        setTimeout(() => {
+          moverPeca(para.i, para.j, para, true);
+        }, 500);
+      }, 1000);
+    }
+
+    // Verifica se há um vencedor com base nas peças ou movimentos disponíveis
+    function verificarVitoria() {
+      let pecasJogador1 = 0, pecasJogador2 = 0;
+      for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+          if (tabuleiro[i][j]) {
+            if (tabuleiro[i][j].jogador === 1) pecasJogador1++;
+            else pecasJogador2++;
+          }
+        }
+      }
+      let movimentosJogador1 = obterTodosMovimentosPossiveis(1);
+      let movimentosJogador2 = obterTodosMovimentosPossiveis(2);
+      if (pecasJogador1 === 0 || movimentosJogador1.length === 0) {
+        tocarSom("som-vitoria");
+        mostrarConfetes(); // <-- Adicione aqui
+        setTimeout(mostrarConfetes, 900);
+        setTimeout(mostrarConfetes, 1800);
+        setTimeout(() => {
+          if (confirm("Jogador 2 (IA) vence! Deseja reiniciar o jogo?")) {
+            reiniciarJogo();
+          }
+        }, 2500); // Aguarda o efeito antes da mensagem
+        return true;
+      }
+      if (pecasJogador2 === 0 || movimentosJogador2.length === 0) {
+        tocarSom("som-vitoria");
+        mostrarConfetes(); // <-- Adicione aqui
+        setTimeout(mostrarConfetes, 900);
+        setTimeout(mostrarConfetes, 1800);
+        setTimeout(() => {
+          if (confirm("Jogador 1 vence! Deseja reiniciar o jogo?")) {
+            if (modo === "Contra a Máquina") desbloquearProximoNivel();
+            reiniciarJogo();
+          }
+        }, 2500); // Aguarda o efeito antes da mensagem
+        return true;
+      }
+      
+      return false;
+    }
+
+    // Destaca os movimentos possíveis no tabuleiro
+    function mostrarMovimentosPossiveis(i = null, j = null) {
+      document.querySelectorAll(".casa.possivel").forEach(c => c.classList.remove("possivel"));
+      if (i !== null && j !== null && tabuleiro[i][j]) {
+        let movimentos = obterTodosMovimentos(i, j);
+        for (let movimento of movimentos) {
+          let casa = document.querySelector(`.casa[data-linha="${movimento.i}"][data-coluna="${movimento.j}"]`);
+          if (casa) casa.classList.add("possivel");
+        }
+      }
+    }
+
+    // Inicializa o jogo com as configurações selecionadas
+    function iniciarJogo() {
+      if (!usuarioAtual) {
+        alert('Faça login para jogar.');
+        return;
+      }
+      corPecas[1] = cores[document.getElementById("corJ1").value];
+      corPecas[2] = cores[document.getElementById("corJ2").value];
+      corCasas = temaCores[document.getElementById("temaTabuleiro").value];
+      modo = document.getElementById("modoJogo").value;
+      nivel = parseInt(document.getElementById("nivelDificuldade").value);
+      salvarPreferenciasUI();
+      document.getElementById("musica-fundo").volume = 0.2;
+      document.getElementById("musica-fundo").play();
+      // Cria o tabuleiro e distribui as peças
+      criarTabuleiro();
+      turnoJogador = 1;
+      capturaObrigatoria = temCapturasPossiveis(1);
+      turnoDaIA = false;
+      pecaSelecionada = null;
+      const turnoElement = document.getElementById("turno");
+      turnoElement.textContent = "Turno: Jogador " + turnoJogador;
+      turnoElement.style.color = corPecas[turnoJogador];
+      atualizarVisual();
+      if (modo === "Contra a Máquina" && turnoJogador === 2) {
+        jogadaDaIA();
+      }
+      const menuEl = document.getElementById("menu");
+      if (menuEl) menuEl.style.display = "none";
+      const boardEl = document.getElementById("tabuleiro");
+      const turnoEl = document.getElementById("turno");
+      if (boardEl) boardEl.style.display = "grid";
+      if (turnoEl) turnoEl.style.display = "block";
+    }
+
+    // Persistência de preferências de UI por usuário
+    function salvarPreferenciasUI() {
+      try {
+        if (!usuarioAtual) return;
+        const prefs = {
+          corJ1: document.getElementById("corJ1").value,
+          corJ2: document.getElementById("corJ2").value,
+          temaTabuleiro: document.getElementById("temaTabuleiro").value,
+          modoJogo: document.getElementById("modoJogo").value,
+          nivelDificuldade: document.getElementById("nivelDificuldade").value
+        };
+        localStorage.setItem('prefs_' + usuarioAtual, JSON.stringify(prefs));
+      } catch (e) {}
+    }
+
+    function restaurarPreferenciasUI() {
+      try {
+        if (!usuarioAtual) return;
+        const salvo = localStorage.getItem('prefs_' + usuarioAtual);
+        if (!salvo) return;
+        const prefs = JSON.parse(salvo);
+        if (prefs.corJ1) document.getElementById("corJ1").value = prefs.corJ1;
+        if (prefs.corJ2) document.getElementById("corJ2").value = prefs.corJ2;
+        if (prefs.temaTabuleiro) document.getElementById("temaTabuleiro").value = prefs.temaTabuleiro;
+        if (prefs.modoJogo) document.getElementById("modoJogo").value = prefs.modoJogo;
+        if (prefs.nivelDificuldade) document.getElementById("nivelDificuldade").value = prefs.nivelDificuldade;
+        atualizarNiveisDesbloqueados();
+      } catch (e) {}
+    }
+
+    // Cria o tabuleiro inicial com peças posicionadas
+function animarDistribuicaoPecas() {
+  document.querySelectorAll(".casa").forEach(c => c.innerHTML = "");
+  tocarSom("som-distribuicao");
+  let posicoes = [];
+  for (let i = 0; i < 8; i++) {
+    for (let j = 0; j < 8; j++) {
+      if (tabuleiro[i][j]) posicoes.push({i, j, jogador: tabuleiro[i][j].jogador, dama: tabuleiro[i][j].dama});
+    }
+  }
+  // Ponto de origem: canto superior esquerdo do tabuleiro
+  const tabuleiroDiv = document.getElementById("tabuleiro");
+  const origem = tabuleiroDiv.getBoundingClientRect();
+  let idx = 0;
+  function colocarProxima() {
+   //hhhhhhhhhhhhhhhhhhhhhhhhh--------hhhhhhhhhhhhhhhhhhh 
+    if (idx >= posicoes.length) return;
+    let {i, j, jogador, dama} = posicoes[idx];
+    const casa = document.querySelectorAll(".casa")[i * 8 + j];
+    const destino = casa.getBoundingClientRect();
+    
+    // Calcula o deslocamento do ponto de origem até a casa destino
+    const deltaX = destino.left - origem.left;
+    const deltaY = destino.top - origem.top;
+    
+    // Cria a peça na posição de origem
+    const peca = document.createElement("div");
+    peca.classList.add("peca", "animando");
+    if (dama) peca.classList.add("dama");
+    peca.style.backgroundColor = corPecas[jogador];
+    peca.style.position = "absolute";
+    peca.style.left = "0px";
+    peca.style.top = "0px";
+    peca.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.2)`;
+    casa.appendChild(peca);
+
+    // Força reflow para garantir a transição
+    void peca.offsetWidth;
+    // Move para o centro da casa (escala normal)
+    peca.style.transition = "transform 0.5s cubic-bezier(.4,2,.6,1)";
+    peca.style.transform = "translate(0,0) scale(1)";
+
+
+    // Remove a classe de animação após a transição
+    peca.addEventListener('transitionend', () => {
+      peca.classList.remove("animando");
+      peca.style.position = "";
+      peca.style.left = "";
+      peca.style.top = "";
+      peca.style.transition = "";
+      peca.style.transform = "";
+      peca.style.pointerEvents = "";
+    }, { once: true });
+
+    idx++;
+    setTimeout(colocarProxima, 100); // velocidade do efeito (ms)
+  }
+  colocarProxima();
+}
+
+//  criarTabuleiro para não criar as peças imediatamente:
+function criarTabuleiro() {
+  tabuleiro = [];
+  const tab = document.getElementById("tabuleiro");
+  tab.innerHTML = "";
+  for (let i = 0; i < 8; i++) {
+    tabuleiro[i] = [];
+    for (let j = 0; j < 8; j++) {
+      const casa = document.createElement("div");
+      casa.classList.add("casa");
+      if ((i + j) % 2 === 0) {
+        casa.classList.add("clara");
+        casa.style.backgroundColor = corCasas[1];
+        tabuleiro[i][j] = null;
+      } else {
+        casa.classList.add("escura");
+        casa.style.backgroundColor = corCasas[0];
+        if (i < 3) {
+          tabuleiro[i][j] = { jogador: 2, dama: false };
+        } else if (i > 4) {
+          tabuleiro[i][j] = { jogador: 1, dama: false };
+        } else {
+          tabuleiro[i][j] = null;
+        }
+      }
+      casa.dataset.linha = i;
+      casa.dataset.coluna = j;
+      casa.onclick = () => selecionarCasa(i, j);
+      tab.appendChild(casa);
+    }
+  }
+  // Chama a animação após montar o tabuleiro
+  setTimeout(animarDistribuicaoPecas, 100);
+}
+
+    // Gerencia a seleção de casas pelo jogador humano
+    function selecionarCasa(i, j) {
+      if (turnoDaIA || (modo === "Contra a Máquina" && turnoJogador === 2)) return;
+      if (pecaSelecionada) {
+        let {i: i0, j: j0} = pecaSelecionada;
+        let movimentos = obterTodosMovimentos(i0, j0);
+        let movimentoValido = movimentos.find(m => m.i == i && m.j == j);
+        if (movimentoValido) {
+          moverPeca(i, j, movimentoValido, false);
+        } else {
+          pecaSelecionada = null;
+          document.querySelectorAll(".casa").forEach(c => c.classList.remove("selecionada"));
+          mostrarMovimentosPossiveis();
+        }
+      } else {
+        if (tabuleiro[i][j] && tabuleiro[i][j].jogador === turnoJogador) {
+          if (modo === "Contra a Máquina" && tabuleiro[i][j].jogador === 2) return;
+          let movimentos = obterTodosMovimentos(i, j);
+          if (movimentos.length > 0) {
+            pecaSelecionada = {i, j};
+            destacarSelecionada(i, j);
+            mostrarMovimentosPossiveis(i, j);
+          }
+        }
+      }
+    }
+
+    // Destaca a casa da peça selecionada
+    function destacarSelecionada(i, j) {
+      document.querySelectorAll(".casa").forEach(c => c.classList.remove("selecionada"));
+      const idx = i * 8 + j;
+      document.querySelectorAll(".casa")[idx].classList.add("selecionada");
+    }
+
+    // Move uma peça e gerencia capturas múltiplas, coroando apenas no final da jogada
+    function moverPeca(i, j, movimento, ehIA = false) {
+      tocarSom("som-movimento");
+      let {i: i0, j: j0} = pecaSelecionada;
+      let peca = tabuleiro[i0][j0];
+      tabuleiro[i][j] = peca;
+      tabuleiro[i0][j0] = null;
+      let maisCapturas = false;
+      if (movimento.capturadaI !== undefined && movimento.capturadaJ !== undefined) {
+        tabuleiro[movimento.capturadaI][movimento.capturadaJ] = null;
+        maisCapturas = obterCapturasPossiveis(i, j).length > 0;
+      }
+      // Coroação só ocorre se não houver capturas adicionais e a peça estiver na última linha
+      if (!maisCapturas && ((peca.jogador === 1 && i === 0) || (peca.jogador === 2 && i === 7))) {
+        peca.dama = true;
+      }
+      atualizarVisual();
+      //-------------------------------------------------------------------
+      if (maisCapturas) {
+        // Permanece na mesma peça para a próxima captura
+        pecaSelecionada = {i, j};
+        mostrarMovimentosPossiveis(i, j);
+        destacarSelecionada(i, j);
+
+        // Caso seja a IA, repetir a jogada automaticamente até não haver mais capturas
+        if (ehIA) {
+          setTimeout(() => {
+            let capturas = obterCapturasPossiveis(i, j);
+            if (capturas.length > 0) {
+              // Continua a jogada da IA com a mesma peça
+              let proximaCaptura = capturas[Math.floor(Math.random() * capturas.length)];
+              moverPeca(proximaCaptura.i, proximaCaptura.j, proximaCaptura, true);
+            } else {
+              // Finaliza a jogada e troca o turno
+              pecaSelecionada = null;
+              document.querySelectorAll(".casa").forEach(c => c.classList.remove("selecionada"));
+              mostrarMovimentosPossiveis();
+              turnoDaIA = false;
+              document.getElementById("tabuleiro").style.pointerEvents = "auto";
+              trocarTurno();
+            }
+          }, 800);
+          return;
+        }
+
+        return; // Jogador humano segue com nova captura
+      }
+
+      //-------------------------------------------------------------------
+      pecaSelecionada = null;
+      document.querySelectorAll(".casa").forEach(c => c.classList.remove("selecionada"));
+      mostrarMovimentosPossiveis();
+      turnoDaIA = false;
+      document.getElementById("tabuleiro").style.pointerEvents = "auto";
+      trocarTurno();
+    }
+
+    // Atualiza a visualização do tabuleiro com base no estado atual
+    function atualizarVisual() {
+      document.querySelectorAll(".casa").forEach(c => c.innerHTML = "");
+      for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+          const casa = document.querySelectorAll(".casa")[i * 8 + j];
+          const conteudo = tabuleiro[i][j];
+          if (conteudo) {
+            const peca = document.createElement("div");
+            peca.classList.add("peca");
+            if (conteudo.dama) peca.classList.add("dama");
+            peca.style.backgroundColor = corPecas[conteudo.jogador];
+            casa.appendChild(peca);
+          }
+        }
+      }
+    }
+
+    // Troca o turno do jogador e verifica condições de vitória
+    function trocarTurno() {
+      turnoJogador = turnoJogador === 1 ? 2 : 1;
+      capturaObrigatoria = temCapturasPossiveis(turnoJogador);
+      const turnoElement = document.getElementById("turno");
+      turnoElement.textContent = "Turno: Jogador " + turnoJogador;
+      turnoElement.style.color = corPecas[turnoJogador];
+      atualizarVisual();
+      if (verificarVitoria()) return;
+      if (modo === "Contra a Máquina" && turnoJogador === 2) {
+        setTimeout(jogadaDaIA, 1000);
+      }
+    }
+
+    // Reinicia o jogo com as configurações atuais
+    function reiniciarJogo() {
+      turnoDaIA = false;
+      document.getElementById("tabuleiro").style.pointerEvents = "auto";
+      const boardEl = document.getElementById("tabuleiro");
+      const turnoEl = document.getElementById("turno");
+      if (boardEl) boardEl.style.display = "grid";
+      if (turnoEl) turnoEl.style.display = "block";
+      iniciarJogo();
+    }
+
+    // Alterna a visibilidade do menu na tela principal
+    function alternarMenu() {
+      const menu = document.getElementById('menu');
+      const visivel = menu.style.display === 'block';
+      const novoVisivel = !visivel;
+      menu.style.display = novoVisivel ? 'block' : 'none';
+      const board = document.getElementById('tabuleiro');
+      const turno = document.getElementById('turno');
+      if (novoVisivel) {
+        // Oculta o tabuleiro e o indicador de turno quando o menu está aberto
+        if (board) board.style.display = 'none';
+        if (turno) turno.style.display = 'none';
+      } else {
+        // Reexibe quando o menu é fechado
+        if (board) board.style.display = 'grid';
+        if (turno) turno.style.display = 'block';
+      }
+    }
+    // Toca um som específico ao clicar em botões
+    function tocarSom(id) {
+      const audio = document.getElementById(id);
+      if (audio) {
+        audio.currentTime = 0;
+        const playPromise = audio.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(() => {});
+        }
+      }
+    }
+    // Exibe confetes na tela após uma vitória  
+    function mostrarConfetes() {
+    const container = document.getElementById("confete-container");
+    container.innerHTML = "";
+    container.style.display = "block";
+    const cores = ["#ff0", "#f00", "#0f0", "#00f", "#ff69b4", "#ffa500"];
+    for (let i = 0; i < 80; i++) {
+      const confete = document.createElement("div");
+      confete.style.position = "absolute";
+      confete.style.width = "12px";
+      confete.style.height = "12px";
+      confete.style.borderRadius = "50%";
+      confete.style.background = cores[Math.floor(Math.random() * cores.length)];
+      confete.style.left = Math.random() * window.innerWidth + "px";
+      confete.style.top = "-20px";
+      confete.style.opacity = "0.8";
+      confete.style.transition = "top 2s cubic-bezier(.4,2,.6,1), left 2s";
+      container.appendChild(confete);
+      setTimeout(() => {
+        confete.style.top = (window.innerHeight - 40) + "px";
+        confete.style.left = (parseFloat(confete.style.left) + (Math.random() * 100 - 50)) + "px";
+      }, 50);
+    }
+    // Remove confetes após 2.8 segundos
+    setTimeout(() => {
+      container.style.display = "none";
+      container.innerHTML = "";
+    }, 2800);
+  }
+
+
+    // Associa as funções aos botões
+    document.getElementById('btn-entrar').onclick = loginUsuario;
+    document.getElementById('btn-cadastrar').onclick = cadastrarUsuario;
+    const cta = document.getElementById('btn-cta');
+    if (cta) cta.onclick = () => {
+      const user = document.getElementById('username');
+      const pass = document.getElementById('password');
+      if (user && !user.value) user.focus();
+      // sugere cadastro/entrada suave
+      tocarSom("som-click");
+    };
+  </script>
+</body>
+</html>
