@@ -15,10 +15,11 @@
       background-image: url('image/Dama11.jpg');
       font-family: Arial, sans-serif; 
       text-align: center; 
-      background-color: #f7f7f7; 
+      background-color: #8B2500; 
       background-size: cover; 
       background-position: center;
-      background-repeat: no-repeat;
+      background-repeat: repeat;
+      background-attachment: fixed;
       margin: 0;
       padding: 0;
       min-height: 100vh;
@@ -54,6 +55,28 @@
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.2);
       box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    }
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 20px auto 0;
+      max-width: 600px;
+      padding: 0 20px;
+    }
+    .game-header h1 {
+      margin: 0;
+    }
+    .btn-sair {
+      background-color: #A0522D;
+      border: 3px solid #696969;
+      color: #080808;
+      width: 100px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.1s ease-in-out;
+      min-height: 44px;
     }
     #login-container {
       /* Estilo do contêiner de login */
@@ -314,17 +337,38 @@
     body {
       background-image: url('image/Dama11.png') !important;
       background-attachment: scroll;
-      background-size: contain;
+      background-size: cover;
       background-position: center;
-      background-repeat: no-repeat;
+      background-repeat: repeat;
     }
-    #login-container { width: 100vw; height: 100vh; border-width: 3vw; border-radius: 10px; }
-
+    #login-container { 
+      width: 100vw; 
+      height: 100vh; 
+      border-width: 2vw; 
+      border-radius: 10px; 
+    }
+    .login-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      width: 95vw;
+      padding: 20px 10px;
+    }
+    .hero {
+      text-align: center;
+      order: 2;
+    }
+    .content {
+      order: 1;
+      width: 100%;
+      padding: 20px 16px;
+    }
     h2 { 
-      font-size: 1.5rem; }
+      font-size: 1.5rem; 
+    }
     h3 { 
-      font-size: 1rem; width: 70%; }
-    .content { width: 94%; padding: 18px 16px; }
+      font-size: 1rem; 
+      width: 70%; 
+    }
     .content input, .content button {
       width: 100%;
       max-width: none;
@@ -343,12 +387,41 @@
       min-height: 30px;
     }
     .peca {
-      width: 65%;
-      height: 65%;
-      min-width: 18px;
-      min-height: 18px;
+      width: 50%;
+      height: 50%;
+      min-width: 16px;
+      min-height: 16px;
     }
-}
+  }
+
+  /* Modo horizontal - botões laterais */
+  @media screen and (orientation: landscape) and (max-width: 1024px) {
+    .game-header {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+    .game-header h1 {
+      margin: 0;
+    }
+    .btn-sair {
+      width: 80px;
+      font-size: 12px;
+    }
+    #turno {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+    }
+    .tabuleiro {
+      margin-top: 60px;
+      width: min(70vh, 90vw);
+    }
+  }
 
   </style>
 </head>
@@ -388,7 +461,10 @@
 
   <!-- Contêiner do jogo -->
   <div id="jogo-container">
-    <h1><button onclick="alternarMenu()">Opções de Jogo</button></h1>
+    <div class="game-header">
+      <h1><button onclick="alternarMenu()">Opções de Jogo</button></h1>
+      <button onclick="sairJogo()" class="btn-sair">Sair</button>
+    </div>
     <div class="controls" id="menu">
       <label>Jogador 1:
         <select id="corJ1">
@@ -1068,8 +1144,11 @@
       modo = document.getElementById("modoJogo").value;
       nivel = parseInt(document.getElementById("nivelDificuldade").value);
       salvarPreferenciasUI();
-      document.getElementById("musica-fundo").volume = 0.2;
-      document.getElementById("musica-fundo").play();
+      const musica = document.getElementById("musica-fundo");
+      if (musica) {
+        musica.volume = 0.2;
+        musica.play().catch(e => console.log('Erro ao reproduzir música:', e));
+      }
       // Cria o tabuleiro e distribui as peças
       criarTabuleiro();
       turnoJogador = 1;
@@ -1358,16 +1437,40 @@ function criarTabuleiro() {
       menu.style.display = novoVisivel ? 'block' : 'none';
       const board = document.getElementById('tabuleiro');
       const turno = document.getElementById('turno');
+      const musica = document.getElementById('musica-fundo');
+      
       if (novoVisivel) {
         // Oculta o tabuleiro e o indicador de turno quando o menu está aberto
         if (board) board.style.display = 'none';
         if (turno) turno.style.display = 'none';
+        // Pausa a música quando o tabuleiro desaparece
+        if (musica) musica.pause();
       } else {
         // Reexibe quando o menu é fechado
         if (board) board.style.display = 'grid';
         if (turno) turno.style.display = 'block';
+        // Inicia a música quando o tabuleiro aparece
+        if (musica) {
+          musica.currentTime = 0;
+          musica.play().catch(e => console.log('Erro ao reproduzir música:', e));
+        }
       }
     }
+
+    // Função para sair do jogo
+    function sairJogo() {
+      const jogoContainer = document.getElementById('jogo-container');
+      const loginContainer = document.getElementById('login-container');
+      const musica = document.getElementById('musica-fundo');
+      
+      // Pausa a música
+      if (musica) musica.pause();
+      
+      // Volta para a tela de login
+      if (jogoContainer) jogoContainer.style.display = 'none';
+      if (loginContainer) loginContainer.style.display = 'flex';
+    }
+
     // Toca um som específico ao clicar em botões
     function tocarSom(id) {
       const audio = document.getElementById(id);
