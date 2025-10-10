@@ -75,10 +75,12 @@
     .game-header h1 button {
       width: 120px;
       font-size: 14px;
+      border: 3px solid rgba(187, 4, 4, 0.85);
+      border-radius: 10px;
     }
     .btn-sair {
       background-color: #A0522D;
-      border: 3px solid #696969;
+      border: 3px solid rgba(187, 4, 4, 0.85);
       color: #080808;
       width: 120px;
       box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
@@ -87,6 +89,7 @@
       transition: all 0.1s ease-in-out;
       min-height: 44px;
       font-size: 14px;
+      border-radius: 10px;
     }
     #login-container {
       /* Estilo do contêiner de login */
@@ -232,7 +235,7 @@
       align-items: center;
       padding: 16px 18px;
       width: fit-content;
-      margin: 16px auto 12px;
+      margin: 16px auto 24px; /* separa do tabuleiro */
       border: 1px solid rgba(255,255,255,0.2);
       border-radius: 14px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.35);
@@ -423,6 +426,7 @@
   <div id="jogo-container">
     <div class="game-header">
       <h1><button onclick="alternarMenu()">Opções de Jogo</button></h1>
+      <button class="btn-sair" onclick="sairDoAplicativo()">Sair</button>
     </div>
     <div class="controls" id="menu">
       <label>Jogador 1:
@@ -474,8 +478,7 @@
           <option value="10">Nível 10</option>
         </select>
       </label>
-      <button onclick="iniciarJogo()">Iniciar Jogo</button>
-      <button onclick="reiniciarJogo()">Reiniciar Jogo</button>
+      
       <div style="margin-top:12px;text-align:left">
         <h3 style="margin:8px 0 6px">Volume</h3>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
@@ -493,6 +496,10 @@
       <div style="margin-top:12px;text-align:left">
         <h3 style="margin:8px 0 6px">Prévia</h3>
         <div id="preview" style="display:grid;grid-template-columns:repeat(8,14px);gap:0;border:2px solid rgba(187,4,4,0.85);border-radius:6px;width:112px;overflow:hidden"></div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:12px;margin-top:12px">
+        <button onclick="iniciarJogo()">Iniciar Jogo</button>
+        <button id="btn-voltar-jogo" onclick="voltarAoJogo()">Voltar ao Jogo</button>
       </div>
     </div>
     <div id="tabuleiro" class="tabuleiro"></div>
@@ -1315,7 +1322,30 @@ function criarTabuleiro() {
     }
 
     // Função para sair do jogo
-    // Removido fluxo de sair para login; mantemos apenas o menu
+    function sairDoAplicativo() {
+      try {
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+          window.close();
+        }
+      } catch(e) {}
+      // Fallback: volta para a tela de opções
+      const menu = document.getElementById('menu');
+      const board = document.getElementById('tabuleiro');
+      const turno = document.getElementById('turno');
+      if (menu) menu.style.display = 'block';
+      if (board) board.style.display = 'none';
+      if (turno) turno.style.display = 'none';
+    }
+
+    // Voltar ao Jogo: fecha menu e retorna ao tabuleiro mantendo estado
+    function voltarAoJogo() {
+      const menu = document.getElementById('menu');
+      const board = document.getElementById('tabuleiro');
+      const turno = document.getElementById('turno');
+      if (menu) menu.style.display = 'none';
+      if (board) board.style.display = 'grid';
+      if (turno) turno.style.display = 'block';
+    }
 
     // Toca um som específico ao clicar em botões
     function tocarSom(id) {

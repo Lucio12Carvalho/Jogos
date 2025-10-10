@@ -1,4 +1,4 @@
-const CACHE_NAME = 'damas-cache-v2';
+const CACHE_NAME = 'damas-cache-v3';
 const ASSETS = [
   './index.html',
   './manifest.json',
