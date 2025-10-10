@@ -1,7 +1,7 @@
 {
   "name": "Jogo de Damas",
   "short_name": "Damas",
-  "start_url": "./VersãoContramaquinav2.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#8B2500",
   "theme_color": "#8B2500",

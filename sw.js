@@ -1,6 +1,6 @@
-const CACHE_NAME = 'damas-cache-v1';
+const CACHE_NAME = 'damas-cache-v2';
 const ASSETS = [
-  './VersãoContramaquinav2.html',
+  './index.html',
   './manifest.json',
   './icon.png.png',
   './audio/captura.mp3',

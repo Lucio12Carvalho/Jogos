@@ -3,13 +3,17 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Jogo de Damas</title>
   <meta name="theme-color" content="#8B2500" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
   <style>
+    html, body {
+      height: 100%;
+      overflow: hidden; /* impede rolagem */
+    }
     body { 
       /* Estilo do corpo da página */
       background-image: url('image/Dama11.jpg');
@@ -322,8 +326,7 @@
     }
     .selecionada { outline: 3px solid yellow; } /* Casa selecionada */
     .possivel { background-color: green !important; } /* Casa de movimento possível */
-    #login-container, #jogo-container { display: none; } /* Inicialmente escondidos */
-    #login-container.active, #jogo-container.active { display: block; } /* Exibe quando ativo */
+    #jogo-container { display: block; } /* tela principal */
     .nivel-bloqueado { 
       /* Estilo de níveis bloqueados */
       background-color: #A0522D;
@@ -400,79 +403,7 @@
     }
   }
 
-  /* Modo horizontal - botões laterais */
-  @media screen and (orientation: landscape) and (max-width: 1024px) {
-    .game-header {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      flex-direction: column;
-      gap: 8px;
-      z-index: 1000;
-    }
-    .game-header h1 {
-      margin: 0;
-    }
-    .game-header h1 button {
-      width: 120px;
-      font-size: 12px;
-      padding: 6px 8px;
-    }
-    .btn-sair {
-      width: 120px;
-      font-size: 12px;
-      padding: 6px 8px;
-    }
-    #turno {
-      position: fixed;
-      top: 10px;
-      right: 200px;
-      z-index: 1000;
-      font-size: 12px;
-      padding: 6px 10px;
-    }
-    .tabuleiro {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      margin: 80px 0 0 20px;
-      width: min(80vh, 50vw);
-      min-width: 300px;
-      aspect-ratio: 1 / 1;
-      border: 8px solid rgba(187, 4, 4, 0.85);
-      border-radius: 14px;
-      box-shadow: 0 18px 40px rgba(0,0,0,0.45);
-      overflow: hidden;
-      touch-action: manipulation;
-      backdrop-filter: blur(2px);
-    }
-    .controls {
-      position: fixed;
-      top: 80px;
-      right: 10px;
-      width: 180px;
-      padding: 10px;
-      font-size: 12px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-    }
-    .controls label {
-      font-size: 11px;
-    }
-    .controls select {
-      font-size: 11px;
-      padding: 4px;
-    }
-    .controls button {
-      width: 100%;
-      font-size: 11px;
-      padding: 6px;
-      margin: 4px 0;
-    }
-  }
+  /* Layout somente vertical: removido estilo específico para horizontal */
 
   </style>
 </head>
@@ -486,35 +417,12 @@
   <audio id="musica-fundo" src="audio/drama.mp3" loop></audio>
 
 
-  <!-- Contêiner de login -->
-  <div id="login-container" class="login active">
-    <div class="login-grid">
-      <section class="hero">
-        <h1>Clássico, elegante e desafiador</h1>
-        <p>Personalize o tabuleiro, jogue localmente ou contra a máquina com níveis progressivos.</p>
-        <ul>
-          <li>Temas de madeira e peças personalizáveis</li>
-          <li>Animações suaves e efeitos sonoros</li>
-          <li>Modo IA com 10 níveis e progresso salvo</li>
-        </ul>
-        <button class="cta" id="btn-cta">Jogar agora</button>
-      </section>
-      <div class="content">
-        <h2>Entrar no jogo</h2>
-        <p class="subtitle">Crie sua conta para salvar progresso</p>
-        <label>Usuário:<input type="text" id="username" placeholder="Seu nome"></label>
-        <label>Senha: <input type="password" id="password" placeholder="Mínimo 6 caracteres"></label><br/>
-        <button id="btn-entrar">Entrar</button>     
-        <button id="btn-cadastrar">Cadastrar</button>
-      </div>
-    </div>
-  </div>
+  
 
   <!-- Contêiner do jogo -->
   <div id="jogo-container">
     <div class="game-header">
       <h1><button onclick="alternarMenu()">Opções de Jogo</button></h1>
-      <button onclick="sairJogo()" class="btn-sair">Sair</button>
     </div>
     <div class="controls" id="menu">
       <label>Jogador 1:
@@ -568,9 +476,27 @@
       </label>
       <button onclick="iniciarJogo()">Iniciar Jogo</button>
       <button onclick="reiniciarJogo()">Reiniciar Jogo</button>
+      <div style="margin-top:12px;text-align:left">
+        <h3 style="margin:8px 0 6px">Volume</h3>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <button id="btn-vol-menor" style="width:40px">-</button>
+          <span id="label-volume">100%</span>
+          <button id="btn-vol-maior" style="width:40px">+</button>
+        </div>
+        <label style="grid-template-columns:auto 1fr;align-items:center;gap:8px">
+          <input type="checkbox" id="mute-musica" /> Silenciar música de fundo
+        </label>
+        <label style="grid-template-columns:auto 1fr;align-items:center;gap:8px">
+          <input type="checkbox" id="mute-efeitos" /> Silenciar sons de movimentos
+        </label>
+      </div>
+      <div style="margin-top:12px;text-align:left">
+        <h3 style="margin:8px 0 6px">Prévia</h3>
+        <div id="preview" style="display:grid;grid-template-columns:repeat(8,14px);gap:0;border:2px solid rgba(187,4,4,0.85);border-radius:6px;width:112px;overflow:hidden"></div>
+      </div>
     </div>
-    <h3 id="turno"></h3>
     <div id="tabuleiro" class="tabuleiro"></div>
+    <h3 id="turno"></h3>
   </div>
   <div id="confete-container" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:999;display:none;"></div>
   <button id="btn-instalar">Instalar App</button>
@@ -628,126 +554,12 @@
     let modo = "";
     let nivel = 1;
     let turnoDaIA = false;
-    let usuarioAtual = null;
-
-    // Array para armazenar usuários e senhas (limite de 10 linhas)
-    let usuarios = [
-      { usuario: "", senha: "" },
-      { usuario: "", senha: "" },
-      { usuario: "", senha: "" },
-      { usuario: "", senha: "" },
-      { usuario: "", senha: "" },
-      { usuario: "", senha: "" },
-      { usuario: "", senha: "" },
-      { usuario: "", senha: "" },
-      { usuario: "", senha: "" },
-      { usuario: "", senha: "" }
-    ];
-
-    // Funções de login e cadastro
-    function carregarUsuarios() {
-      try {
-        const salvo = localStorage.getItem('usuarios_damas');
-        if (salvo) {
-          const lista = JSON.parse(salvo);
-          // Garante 10 posições
-          while (lista.length < 10) lista.push({ usuario: "", senha: "" });
-          usuarios = lista.slice(0, 10);
-        } else {
-          // Inicializa 10 posições vazias
-          usuarios = [
-            { usuario: "", senha: "" },
-            { usuario: "", senha: "" },
-            { usuario: "", senha: "" },
-            { usuario: "", senha: "" },
-            { usuario: "", senha: "" },
-            { usuario: "", senha: "" },
-            { usuario: "", senha: "" },
-            { usuario: "", senha: "" },
-            { usuario: "", senha: "" },
-            { usuario: "", senha: "" }
-          ];
-          localStorage.setItem('usuarios_damas', JSON.stringify(usuarios));
-        }
-      } catch (e) {
-        // Em caso de erro, mantém o array em memória
-      }
-      return usuarios;
-    }
-
-    function salvarUsuarios(novosUsuarios = null) {
-      try {
-        if (Array.isArray(novosUsuarios)) usuarios = novosUsuarios;
-        localStorage.setItem('usuarios_damas', JSON.stringify(usuarios));
-      } catch (e) {
-        // Silencia erros de armazenamento
-      }
-    }
-
-    function cadastrarUsuario() {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-
-      if (!username || !password) {
-        alert('Por favor, preencha usuário e senha.');
-        return;
-      }
-      if (username.length < 3 || password.length < 6) {
-        alert('Usuário deve ter pelo menos 3 caracteres e senha 6 caracteres.');
-        return;
-      }
-
-      let usuariosArray = carregarUsuarios();
-      if (usuariosArray.some(user => user.usuario === username)) {
-        alert('Usuário já existe. Tente outro nome.');
-        return;
-      }
-
-      // Procura a primeira posição vazia no array
-      for (let i = 0; i < usuariosArray.length; i++) {
-        if (!usuariosArray[i].usuario && !usuariosArray[i].senha) {
-          usuariosArray[i] = { usuario: username, senha: btoa(password) };
-          salvarUsuarios(usuariosArray);
-          alert('Usuário cadastrado com sucesso! Faça login.');
-          return;
-        }
-      }
-      alert('Limite de 10 usuários atingido.');
-    }
-
-    function loginUsuario() {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-
-      if (!username || !password) {
-        alert('Por favor, preencha usuário e senha.');
-        return;
-      }
-
-      let usuariosArray = carregarUsuarios();
-      const usuario = usuariosArray.find(user => user.usuario === username && user.senha === btoa(password));
-      if (usuario) {
-        usuarioAtual = username;
-        atualizarNiveisDesbloqueados();
-        document.getElementById('login-container').classList.remove('active');
-        document.getElementById('jogo-container').classList.add('active');
-        localStorage.setItem('session', JSON.stringify({ username, timestamp: new Date().toISOString() }));
-        // Restaurar preferências de UI do usuário, se existirem
-        restaurarPreferenciasUI();
-      } else {
-        alert('Usuário ou senha inválidos.');
-      }
-    }
-
-// Atualiza os níveis desbloqueados com base no usuário atual
+    // Persistência global (sem usuário)
     function atualizarNiveisDesbloqueados() {
-      let usuariosArray = carregarUsuarios();
-      let idx = usuariosArray.findIndex(u => u.usuario === usuarioAtual);
-      // Se não encontrar, mantém 1 desbloqueado
       let nivelDesbloqueado = 1;
-      if (idx !== -1) {
-        nivelDesbloqueado = usuariosArray[idx].nivelDesbloqueado ?? 1;
-      }
+      try {
+        nivelDesbloqueado = parseInt(localStorage.getItem('nivel_desbloqueado') || '1');
+      } catch (e) {}
       const selectNivel = document.getElementById('nivelDificuldade');
       for (let i = 0; i < selectNivel.options.length; i++) {
         const nivelOpcao = parseInt(selectNivel.options[i].value);
@@ -760,27 +572,18 @@
         }
       }
     }
-// Desbloqueia o próximo nível após vencer
- function desbloquearProximoNivel() {
-  let usuarios = carregarUsuarios();
-  let idx = usuarios.findIndex(u => u.usuario === usuarioAtual);
-  if (idx !== -1) {
-    // Nível jogado atualmente
-    const nivelAtual = parseInt(document.getElementById('nivelDificuldade').value);
-    // Próximo nível a ser desbloqueado
-    const proximoNivel = nivelAtual + 1;
-    // Só desbloqueia se o próximo nível for maior que o já desbloqueado
-    if ((usuarios[idx].nivelDesbloqueado ?? 1) < proximoNivel && proximoNivel <= 10) {
-      usuarios[idx].nivelDesbloqueado = proximoNivel;
-      salvarUsuarios(usuarios);
-      atualizarNiveisDesbloqueados();
-      alert('Nível ' + proximoNivel + ' desbloqueado!');
-    } else {
-      // Já está desbloqueado ou não há mais níveis
-      alert('Nada a desbloquear!');
+    function desbloquearProximoNivel() {
+      const nivelAtual = parseInt(document.getElementById('nivelDificuldade').value);
+      const proximoNivel = Math.min(10, nivelAtual + 1);
+      try {
+        const atual = parseInt(localStorage.getItem('nivel_desbloqueado') || '1');
+        if (proximoNivel > atual) {
+          localStorage.setItem('nivel_desbloqueado', String(proximoNivel));
+          atualizarNiveisDesbloqueados();
+          alert('Nível ' + proximoNivel + ' desbloqueado!');
+        }
+      } catch (e) {}
     }
-  }
-}
 
 
     // === Lógica do Jogo ===
@@ -1185,10 +988,6 @@
 
     // Inicializa o jogo com as configurações selecionadas
     function iniciarJogo() {
-      if (!usuarioAtual) {
-        alert('Faça login para jogar.');
-        return;
-      }
       corPecas[1] = cores[document.getElementById("corJ1").value];
       corPecas[2] = cores[document.getElementById("corJ2").value];
       corCasas = temaCores[document.getElementById("temaTabuleiro").value];
@@ -1197,8 +996,14 @@
       salvarPreferenciasUI();
       const musica = document.getElementById("musica-fundo");
       if (musica) {
-        musica.volume = 0.2;
-        musica.play().catch(e => console.log('Erro ao reproduzir música:', e));
+        const vol = obterVolume();
+        const muteMusica = obterMuteMusica();
+        musica.volume = vol;
+        if (!muteMusica && vol > 0) {
+          musica.play().catch(() => {});
+        } else {
+          musica.pause();
+        }
       }
       // Cria o tabuleiro e distribui as peças
       criarTabuleiro();
@@ -1224,7 +1029,6 @@
     // Persistência de preferências de UI por usuário
     function salvarPreferenciasUI() {
       try {
-        if (!usuarioAtual) return;
         const prefs = {
           corJ1: document.getElementById("corJ1").value,
           corJ2: document.getElementById("corJ2").value,
@@ -1232,14 +1036,13 @@
           modoJogo: document.getElementById("modoJogo").value,
           nivelDificuldade: document.getElementById("nivelDificuldade").value
         };
-        localStorage.setItem('prefs_' + usuarioAtual, JSON.stringify(prefs));
+        localStorage.setItem('prefs_global', JSON.stringify(prefs));
       } catch (e) {}
     }
 
     function restaurarPreferenciasUI() {
       try {
-        if (!usuarioAtual) return;
-        const salvo = localStorage.getItem('prefs_' + usuarioAtual);
+        const salvo = localStorage.getItem('prefs_global');
         if (!salvo) return;
         const prefs = JSON.parse(salvo);
         if (prefs.corJ1) document.getElementById("corJ1").value = prefs.corJ1;
@@ -1497,38 +1300,31 @@ function criarTabuleiro() {
         // Oculta o tabuleiro e o indicador de turno quando o menu está aberto
         if (board) board.style.display = 'none';
         if (turno) turno.style.display = 'none';
-        // Pausa a música quando o tabuleiro desaparece
-        if (musica) musica.pause();
+        // Mantém estado de música conforme preferências
       } else {
         // Reexibe quando o menu é fechado
         if (board) board.style.display = 'grid';
         if (turno) turno.style.display = 'block';
-        // Inicia a música quando o tabuleiro aparece
         if (musica) {
-          musica.currentTime = 0;
-          musica.play().catch(e => console.log('Erro ao reproduzir música:', e));
+          const vol = obterVolume();
+          const muteMusica = obterMuteMusica();
+          musica.volume = vol;
+          if (!muteMusica && vol > 0) musica.play().catch(() => {});
         }
       }
     }
 
     // Função para sair do jogo
-    function sairJogo() {
-      const jogoContainer = document.getElementById('jogo-container');
-      const loginContainer = document.getElementById('login-container');
-      const musica = document.getElementById('musica-fundo');
-      
-      // Pausa a música
-      if (musica) musica.pause();
-      
-      // Volta para a tela de login
-      if (jogoContainer) jogoContainer.style.display = 'none';
-      if (loginContainer) loginContainer.style.display = 'flex';
-    }
+    // Removido fluxo de sair para login; mantemos apenas o menu
 
     // Toca um som específico ao clicar em botões
     function tocarSom(id) {
+      const efeitosMutados = obterMuteEfeitos();
+      if (efeitosMutados && id !== 'musica-fundo') return;
       const audio = document.getElementById(id);
       if (audio) {
+        const vol = obterVolume();
+        audio.volume = vol;
         audio.currentTime = 0;
         const playPromise = audio.play();
         if (playPromise && typeof playPromise.catch === 'function') {
@@ -1567,17 +1363,120 @@ function criarTabuleiro() {
   }
 
 
-    // Associa as funções aos botões
-    document.getElementById('btn-entrar').onclick = loginUsuario;
-    document.getElementById('btn-cadastrar').onclick = cadastrarUsuario;
-    const cta = document.getElementById('btn-cta');
-    if (cta) cta.onclick = () => {
-      const user = document.getElementById('username');
-      const pass = document.getElementById('password');
-      if (user && !user.value) user.focus();
-      // sugere cadastro/entrada suave
-      tocarSom("som-click");
-    };
+    // ======= Inicialização sem login =======
+    (function initSemLogin(){
+      // Mostrar opções imediatamente
+      document.getElementById('menu').style.display = 'block';
+      // Restaurar preferências
+      restaurarPreferenciasUI();
+      atualizarNiveisDesbloqueados();
+      // Configurar volume UI
+      configurarControlesDeAudio();
+      // Construir prévia inicial
+      construirPreview();
+      atualizarPreview();
+      // Atualiza prévia ao mudar seletores
+      ['corJ1','corJ2','temaTabuleiro'].forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener('change', () => { salvarPreferenciasUI(); atualizarPreview(); });
+      });
+    })();
+
+    // ======= Áudio: preferências =======
+    function obterVolume(){
+      try { return Math.max(0, Math.min(1, parseFloat(localStorage.getItem('volume_geral') || '1'))); } catch(e){ return 1; }
+    }
+    function salvarVolume(v){
+      try { localStorage.setItem('volume_geral', String(v)); } catch(e){}
+    }
+    function obterMuteMusica(){
+      try { return localStorage.getItem('mute_musica') === '1'; } catch(e){ return false; }
+    }
+    function salvarMuteMusica(flag){
+      try { localStorage.setItem('mute_musica', flag ? '1' : '0'); } catch(e){}
+    }
+    function obterMuteEfeitos(){
+      try { return localStorage.getItem('mute_efeitos') === '1'; } catch(e){ return false; }
+    }
+    function salvarMuteEfeitos(flag){
+      try { localStorage.setItem('mute_efeitos', flag ? '1' : '0'); } catch(e){}
+    }
+    function configurarControlesDeAudio(){
+      const label = document.getElementById('label-volume');
+      const btnMenos = document.getElementById('btn-vol-menor');
+      const btnMais = document.getElementById('btn-vol-maior');
+      const chkMusica = document.getElementById('mute-musica');
+      const chkEfeitos = document.getElementById('mute-efeitos');
+      const musica = document.getElementById('musica-fundo');
+      let vol = obterVolume();
+      label.textContent = Math.round(vol*100) + '%';
+      chkMusica.checked = obterMuteMusica();
+      chkEfeitos.checked = obterMuteEfeitos();
+      function aplicar(){
+        salvarVolume(vol);
+        if (musica){
+          musica.volume = vol;
+          if (!chkMusica.checked && vol > 0) {
+            musica.play().catch(()=>{});
+          } else {
+            musica.pause();
+          }
+        }
+      }
+      btnMenos.onclick = () => { vol = Math.max(0, +(vol - 0.1).toFixed(2)); label.textContent = Math.round(vol*100)+'%'; aplicar(); };
+      btnMais.onclick = () => { vol = Math.min(1, +(vol + 0.1).toFixed(2)); label.textContent = Math.round(vol*100)+'%'; aplicar(); };
+      chkMusica.onchange = () => { salvarMuteMusica(chkMusica.checked); aplicar(); };
+      chkEfeitos.onchange = () => { salvarMuteEfeitos(chkEfeitos.checked); };
+      aplicar();
+    }
+
+    // ======= Prévia do tabuleiro =======
+    function construirPreview(){
+      const prev = document.getElementById('preview');
+      if (!prev) return;
+      prev.innerHTML = '';
+      for (let i=0;i<8;i++){
+        for (let j=0;j<8;j++){
+          const sq = document.createElement('div');
+          sq.style.width = '14px';
+          sq.style.height = '14px';
+          sq.dataset.i = i; sq.dataset.j = j;
+          prev.appendChild(sq);
+        }
+      }
+    }
+    function atualizarPreview(){
+      const tema = document.getElementById('temaTabuleiro').value;
+      const c1 = cores[document.getElementById('corJ1').value];
+      const c2 = cores[document.getElementById('corJ2').value];
+      const [escura, clara] = temaCores[tema];
+      const prev = document.getElementById('preview');
+      if (!prev) return;
+      const children = prev.children;
+      for (let i=0;i<8;i++){
+        for (let j=0;j<8;j++){
+          const idx = i*8+j;
+          const el = children[idx];
+          if ((i+j)%2===0){
+            el.style.background = clara;
+          } else {
+            el.style.background = escura;
+          }
+          el.style.position = 'relative';
+          el.innerHTML = '';
+          if ((i<2 && (i+j)%2===1)){
+            const p = document.createElement('div');
+            p.style.width = '8px'; p.style.height='8px'; p.style.borderRadius='50%'; p.style.background=c2; p.style.margin='3px auto 0';
+            el.appendChild(p);
+          }
+          if ((i>5 && (i+j)%2===1)){
+            const p = document.createElement('div');
+            p.style.width = '8px'; p.style.height='8px'; p.style.borderRadius='50%'; p.style.background=c1; p.style.margin='3px auto 0';
+            el.appendChild(p);
+          }
+        }
+      }
+    }
   </script>
 </body>
 </html>
