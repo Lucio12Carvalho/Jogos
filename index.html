@@ -671,18 +671,13 @@
     }
 
     // Obtém capturas possíveis para uma peça, permitindo capturas em qualquer direção diagonal
-    function obterCapturasPossiveis(i, j, direcaoObrigatoria = null) {
+    function obterCapturasPossiveis(i, j) {
       let peca = tabuleiro[i][j];
       let capturas = [];
       // Peças regulares e damas podem capturar em todas as direções diagonais
       let direcoes = [[-1,-1], [-1,1], [1,-1], [1,1]];
 
       for (let dir of direcoes) {
-        // Se há direção obrigatória (captura múltipla), só permite essa direção
-        if (direcaoObrigatoria && (dir[0] !== direcaoObrigatoria[0] || dir[1] !== direcaoObrigatoria[1])) {
-          continue;
-        }
-        
         let di = dir[0], dj = dir[1];
         let ni = i + di, nj = j + dj;
         if (peca.dama) {
@@ -691,7 +686,7 @@
             if (tabuleiro[ni][nj] && tabuleiro[ni][nj].jogador !== peca.jogador) {
               let mi = ni + di, mj = nj + dj;
               while (estaDentroDosLimites(mi, mj) && !tabuleiro[mi][mj]) {
-                capturas.push({i: mi, j: mj, capturadaI: ni, capturadaJ: nj, direcao: dir});
+                capturas.push({i: mi, j: mj, capturadaI: ni, capturadaJ: nj});
                 mi += di;
                 mj += dj;
               }
@@ -706,7 +701,7 @@
           let mi = i + 2 * di, mj = j + 2 * dj;
           if (estaDentroDosLimites(ni, nj) && estaDentroDosLimites(mi, mj) &&
               tabuleiro[ni][nj] && tabuleiro[ni][nj].jogador !== peca.jogador && !tabuleiro[mi][mj]) {
-            capturas.push({i: mi, j: mj, capturadaI: ni, capturadaJ: nj, direcao: dir});
+            capturas.push({i: mi, j: mj, capturadaI: ni, capturadaJ: nj});
           }
         }
       }
@@ -744,8 +739,8 @@
     }
 
     // Obtém movimentos possíveis para uma peça específica, priorizando capturas
-    function obterTodosMovimentos(i, j, direcaoObrigatoria = null) {
-      let capturas = obterCapturasPossiveis(i, j, direcaoObrigatoria);
+    function obterTodosMovimentos(i, j) {
+      let capturas = obterCapturasPossiveis(i, j);
       return temCapturasPossiveis(tabuleiro[i][j].jogador) ? capturas : capturas.concat(obterMovimentosRegularesPossiveis(i, j));
     }
 
@@ -799,16 +794,12 @@
     }
 
     // Versões "simuladas" que operam sobre um tabuleiro fornecido
-    function obterCapturasPossiveisSim(tabuleiroParam, i, j, direcaoObrigatoria = null) {
+    function obterCapturasPossiveisSim(tabuleiroParam, i, j) {
       let peca = tabuleiroParam[i][j];
       if (!peca) return [];
       let capturas = [];
       let direcoes = [[-1,-1], [-1,1], [1,-1], [1,1]];
       for (let dir of direcoes) {
-        // Se há direção obrigatória (captura múltipla), só permite essa direção
-        if (direcaoObrigatoria && (dir[0] !== direcaoObrigatoria[0] || dir[1] !== direcaoObrigatoria[1])) {
-          continue;
-        }
         let di = dir[0], dj = dir[1];
         let ni = i + di, nj = j + dj;
         if (peca.dama) {
@@ -816,7 +807,7 @@
             if (tabuleiroParam[ni][nj] && tabuleiroParam[ni][nj].jogador !== peca.jogador) {
               let mi = ni + di, mj = nj + dj;
               while (estaDentroDosLimites(mi, mj) && !tabuleiroParam[mi][mj]) {
-                capturas.push({i: mi, j: mj, capturadaI: ni, capturadaJ: nj, direcao: dir});
+                capturas.push({i: mi, j: mj, capturadaI: ni, capturadaJ: nj});
                 mi += di; mj += dj;
               }
               break;
@@ -828,7 +819,7 @@
           let mi = i + 2 * di, mj = j + 2 * dj;
           if (estaDentroDosLimites(ni, nj) && estaDentroDosLimites(mi, mj) &&
               tabuleiroParam[ni][nj] && tabuleiroParam[ni][nj].jogador !== peca.jogador && !tabuleiroParam[mi][mj]) {
-            capturas.push({i: mi, j: mj, capturadaI: ni, capturadaJ: nj, direcao: dir});
+            capturas.push({i: mi, j: mj, capturadaI: ni, capturadaJ: nj});
           }
         }
       }
@@ -1076,10 +1067,10 @@
     }
 
     // Destaca os movimentos possíveis no tabuleiro
-    function mostrarMovimentosPossiveis(i = null, j = null, direcaoObrigatoria = null) {
+    function mostrarMovimentosPossiveis(i = null, j = null) {
       document.querySelectorAll(".casa.possivel").forEach(c => c.classList.remove("possivel"));
       if (i !== null && j !== null && tabuleiro[i][j]) {
-        let movimentos = obterTodosMovimentos(i, j, direcaoObrigatoria);
+        let movimentos = obterTodosMovimentos(i, j);
         for (let movimento of movimentos) {
           let casa = document.querySelector(`.casa[data-linha="${movimento.i}"][data-coluna="${movimento.j}"]`);
           if (casa) casa.classList.add("possivel");
@@ -1288,22 +1279,16 @@ function criarTabuleiro() {
     }
 
     // Move uma peça e gerencia capturas múltiplas, coroando apenas no final da jogada
-    function moverPeca(i, j, movimento, ehIA = false, direcaoObrigatoria = null) {
+    function moverPeca(i, j, movimento, ehIA = false) {
       tocarSom("som-movimento");
       let {i: i0, j: j0} = pecaSelecionada;
       let peca = tabuleiro[i0][j0];
       tabuleiro[i][j] = peca;
       tabuleiro[i0][j0] = null;
       let maisCapturas = false;
-      let novaDirecaoObrigatoria = direcaoObrigatoria;
-      
       if (movimento.capturadaI !== undefined && movimento.capturadaJ !== undefined) {
         tabuleiro[movimento.capturadaI][movimento.capturadaJ] = null;
-        // Se é a primeira captura, define a direção obrigatória
-        if (!direcaoObrigatoria && movimento.direcao) {
-          novaDirecaoObrigatoria = movimento.direcao;
-        }
-        maisCapturas = obterCapturasPossiveis(i, j, novaDirecaoObrigatoria).length > 0;
+        maisCapturas = obterCapturasPossiveis(i, j).length > 0;
       }
       // Coroação só ocorre se não houver capturas adicionais e a peça estiver na última linha
       if (!maisCapturas && ((peca.jogador === 1 && i === 0) || (peca.jogador === 2 && i === 7))) {
@@ -1314,17 +1299,17 @@ function criarTabuleiro() {
       if (maisCapturas) {
         // Permanece na mesma peça para a próxima captura
         pecaSelecionada = {i, j};
-        mostrarMovimentosPossiveis(i, j, novaDirecaoObrigatoria);
+        mostrarMovimentosPossiveis(i, j);
         destacarSelecionada(i, j);
 
         // Caso seja a IA, repetir a jogada automaticamente até não haver mais capturas
         if (ehIA) {
           setTimeout(() => {
-            let capturas = obterCapturasPossiveis(i, j, novaDirecaoObrigatoria);
+            let capturas = obterCapturasPossiveis(i, j);
             if (capturas.length > 0) {
-              // Continua a jogada da IA com a mesma peça na mesma direção
+              // Continua a jogada da IA com a mesma peça
               let proximaCaptura = capturas[Math.floor(Math.random() * capturas.length)];
-              moverPeca(proximaCaptura.i, proximaCaptura.j, proximaCaptura, true, novaDirecaoObrigatoria);
+              moverPeca(proximaCaptura.i, proximaCaptura.j, proximaCaptura, true);
             } else {
               // Finaliza a jogada e troca o turno
               pecaSelecionada = null;
