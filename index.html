@@ -953,11 +953,11 @@
     // Algoritmo Minimax para níveis avançados da IA
     function minimax(tabuleiroParam, profundidade, jogador, alpha, beta) {
       if (profundidade === 0) {
-        return { pontuacao: avaliarTabuleiro(tabuleiroParam, 2) };
+        return { pontuacao: avaliarTabuleiro(tabuleiroParam, 2), movimento: null };
       }
       let movimentos = obterTodosMovimentosPossiveisSim(tabuleiroParam, jogador);
       if (movimentos.length === 0) {
-        return { pontuacao: jogador === 2 ? -Infinity : Infinity };
+        return { pontuacao: jogador === 2 ? -Infinity : Infinity, movimento: null };
       }
       let melhorMovimento = null;
       if (jogador === 2) {
@@ -1042,8 +1042,18 @@
           let profundidade = nivel === 7 ? 2 : nivel === 8 ? 3 : nivel === 9 ? 4 : 5;
           let resultado = minimax(tabuleiro, profundidade, 2, -Infinity, Infinity);
           movimentoEscolhido = resultado.movimento;
+          
+          // Fallback: se minimax não retornou movimento válido, escolhe aleatoriamente
+          if (!movimentoEscolhido && movimentos.length > 0) {
+            console.log('Minimax falhou, usando movimento aleatório');
+            let capturas = movimentos.filter(m => m.para.capturadaI !== undefined);
+            movimentoEscolhido = capturas.length > 0 
+              ? capturas[Math.floor(Math.random() * capturas.length)]
+              : movimentos[Math.floor(Math.random() * movimentos.length)];
+          }
         }
         if (!movimentoEscolhido) {
+          console.log('Nenhum movimento disponível para a IA');
           turnoDaIA = false;
           document.getElementById("tabuleiro").style.pointerEvents = "auto";
           verificarVitoria();
