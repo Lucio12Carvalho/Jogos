@@ -325,7 +325,7 @@
       /* Estilo do tabuleiro */
       display: grid; 
       grid-template-columns: repeat(8, 60px); 
-      margin: 0 auto; 
+      margin: 20px auto 20px; 
       width: 480px; 
       border: 8px solid rgba(187, 4, 4, 0.85);
       border-radius: 14px;
@@ -333,6 +333,12 @@
       overflow: hidden;
       touch-action: manipulation;
       backdrop-filter: blur(2px);
+    }
+    .Anuncios {
+      margin: 05px auto 05px;
+      width: 180px;
+      border-radius: 14px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.45);
     }
     .peca.animando {
       position: absolute;
@@ -430,6 +436,9 @@
       width: 96vw;
       min-width: 0;
     }
+    .Anuncios {
+      width: 96vw;
+    }
     .casa {
       width: 12vw;
       height: 12vw;
@@ -447,6 +456,10 @@
   /* Layout somente vertical: removido estilo específico para horizontal */
 
   </style>
+  
+  <!-- Google AdMob -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9090639456230110"
+     crossorigin="anonymous"></script>
 </head>
 <body>
   <!-- Áudios -->
@@ -542,6 +555,15 @@
     </div>
     <div id="tabuleiro" class="tabuleiro"></div>
     <h3 id="turno"></h3>
+    <div id="Anuncios" class="Anuncios">
+      <!-- Anúncio do Google AdMob -->
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-9090639456230110"
+           data-ad-slot="0000000000"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+    </div>    
   </div>
   <div id="modal-overlay" class="modal-overlay">
     <div class="modal">
@@ -565,6 +587,13 @@
         navigator.serviceWorker.register('sw.js').catch(() => {});
       }
       inicializarPWA();
+      
+      // Inicializa anúncios do Google AdMob
+      try {
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (e) {
+        console.log('Erro ao carregar anúncio:', e);
+      }
     };
     // === PWA Instalação ===
     let eventoInstalacaoDeferido = null;
@@ -671,20 +700,42 @@
     }
 
     // Obtém capturas possíveis para uma peça, permitindo capturas em qualquer direção diagonal
-    function obterCapturasPossiveis(i, j) {
+    // Parâmetros opcionais i0, j0: posição anterior (para evitar voltar na mesma direção em capturas múltiplas)
+    function obterCapturasPossiveis(i, j, i0 = null, j0 = null) {
       let peca = tabuleiro[i][j];
       let capturas = [];
       // Peças regulares e damas podem capturar em todas as direções diagonais
       let direcoes = [[-1,-1], [-1,1], [1,-1], [1,1]];
 
+      // Se há posição anterior, calcula a direção de onde veio para bloqueá-la
+      let direcaoBloqueada = null;
+      if (i0 !== null && j0 !== null) {
+        let deltaI = i - i0;
+        let deltaJ = j - j0;
+        // Normaliza a direção (apenas o sinal importa)
+        if (deltaI !== 0 && deltaJ !== 0) {
+          let dirI = deltaI > 0 ? 1 : -1;
+          let dirJ = deltaJ > 0 ? 1 : -1;
+          // A direção bloqueada é a oposta (de onde veio)
+          direcaoBloqueada = [-dirI, -dirJ];
+        }
+      }
+
       for (let dir of direcoes) {
         let di = dir[0], dj = dir[1];
+        
+        // Bloqueia a direção oposta em capturas múltiplas
+        if (direcaoBloqueada && di === direcaoBloqueada[0] && dj === direcaoBloqueada[1]) {
+          continue; // Pula esta direção
+        }
+        
         let ni = i + di, nj = j + dj;
         if (peca.dama) {
           // Damas podem capturar em várias casas na mesma direção
           while (estaDentroDosLimites(ni, nj)) {
             if (tabuleiro[ni][nj] && tabuleiro[ni][nj].jogador !== peca.jogador) {
               let mi = ni + di, mj = nj + dj;
+              // Adiciona todas as casas vazias após a peça capturada
               while (estaDentroDosLimites(mi, mj) && !tabuleiro[mi][mj]) {
                 capturas.push({i: mi, j: mj, capturadaI: ni, capturadaJ: nj});
                 mi += di;
@@ -724,11 +775,21 @@
     // Obtém todos os movimentos possíveis para um jogador, priorizando capturas
     function obterTodosMovimentosPossiveis(jogador) {
       let movimentosPossiveis = [];
+      let existemCapturas = temCapturasPossiveis(jogador);
+      
       for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
           if (tabuleiro[i][j] && tabuleiro[i][j].jogador === jogador) {
             let capturas = obterCapturasPossiveis(i, j);
-            let movimentos = temCapturasPossiveis(jogador) ? capturas : capturas.concat(obterMovimentosRegularesPossiveis(i, j));
+            let movimentos;
+            
+            // Se existem capturas obrigatórias, apenas peças com captura podem se mover
+            if (existemCapturas) {
+              movimentos = capturas; // Apenas capturas, se houver
+            } else {
+              movimentos = capturas.concat(obterMovimentosRegularesPossiveis(i, j));
+            }
+            
             movimentos.forEach(mov => {
               movimentosPossiveis.push({ de: {i, j}, para: mov });
             });
@@ -739,9 +800,24 @@
     }
 
     // Obtém movimentos possíveis para uma peça específica, priorizando capturas
-    function obterTodosMovimentos(i, j) {
-      let capturas = obterCapturasPossiveis(i, j);
-      return temCapturasPossiveis(tabuleiro[i][j].jogador) ? capturas : capturas.concat(obterMovimentosRegularesPossiveis(i, j));
+    // Parâmetros opcionais i0, j0: posição anterior (para capturas múltiplas)
+    function obterTodosMovimentos(i, j, i0 = null, j0 = null) {
+      let capturas = obterCapturasPossiveis(i, j, i0, j0);
+      
+      // Se está em captura múltipla (i0 e j0 não null), retorna APENAS as capturas da peça atual
+      // Não verifica o tabuleiro inteiro, pois a mesma peça DEVE continuar capturando
+      if (i0 !== null && j0 !== null) {
+        return capturas; // Capturas obrigatórias da mesma peça
+      }
+      
+      // Se não está em captura múltipla, verifica se o jogador tem capturas disponíveis
+      if (temCapturasPossiveis(tabuleiro[i][j].jogador)) {
+        // Apenas retorna capturas. Se esta peça não tem captura, retorna array vazio
+        return capturas;
+      }
+      
+      // Se não há capturas obrigatórias, permite movimentos regulares
+      return capturas.concat(obterMovimentosRegularesPossiveis(i, j));
     }
 
     // Avalia o estado do tabuleiro para a IA, atribuindo pontuações
@@ -1067,10 +1143,10 @@
     }
 
     // Destaca os movimentos possíveis no tabuleiro
-    function mostrarMovimentosPossiveis(i = null, j = null) {
+    function mostrarMovimentosPossiveis(i = null, j = null, i0 = null, j0 = null) {
       document.querySelectorAll(".casa.possivel").forEach(c => c.classList.remove("possivel"));
       if (i !== null && j !== null && tabuleiro[i][j]) {
-        let movimentos = obterTodosMovimentos(i, j);
+        let movimentos = obterTodosMovimentos(i, j, i0, j0);
         for (let movimento of movimentos) {
           let casa = document.querySelector(`.casa[data-linha="${movimento.i}"][data-coluna="${movimento.j}"]`);
           if (casa) casa.classList.add("possivel");
@@ -1248,12 +1324,26 @@ function criarTabuleiro() {
     function selecionarCasa(i, j) {
       if (turnoDaIA || (modo === "Contra a Máquina" && turnoJogador === 2)) return;
       if (pecaSelecionada) {
-        let {i: i0, j: j0} = pecaSelecionada;
-        let movimentos = obterTodosMovimentos(i0, j0);
+        let {i: i0, j: j0, i0: iPrev, j0: jPrev} = pecaSelecionada;
+        // Se há posição anterior (captura múltipla), passa para bloquear direção oposta
+        let movimentos = obterTodosMovimentos(i0, j0, iPrev, jPrev);
         let movimentoValido = movimentos.find(m => m.i == i && m.j == j);
         if (movimentoValido) {
           moverPeca(i, j, movimentoValido, false);
         } else {
+          // Se está em captura múltipla (iPrev definido), NÃO permite desselecionar
+          // A peça DEVE continuar capturando se houver capturas disponíveis
+          if (iPrev !== undefined && jPrev !== undefined) {
+            let capturasObrigatorias = obterCapturasPossiveis(i0, j0, iPrev, jPrev);
+            if (capturasObrigatorias.length > 0) {
+              // Tem capturas obrigatórias, não pode desselecionar
+              // Apenas destaca novamente a peça
+              destacarSelecionada(i0, j0);
+              return;
+            }
+          }
+          
+          // Permite desselecionar apenas se não houver capturas múltiplas pendentes
           pecaSelecionada = null;
           document.querySelectorAll(".casa").forEach(c => c.classList.remove("selecionada"));
           mostrarMovimentosPossiveis();
@@ -1288,7 +1378,8 @@ function criarTabuleiro() {
       let maisCapturas = false;
       if (movimento.capturadaI !== undefined && movimento.capturadaJ !== undefined) {
         tabuleiro[movimento.capturadaI][movimento.capturadaJ] = null;
-        maisCapturas = obterCapturasPossiveis(i, j).length > 0;
+        // Passa a posição anterior (i0, j0) para bloquear direção oposta em capturas múltiplas
+        maisCapturas = obterCapturasPossiveis(i, j, i0, j0).length > 0;
       }
       // Coroação só ocorre se não houver capturas adicionais e a peça estiver na última linha
       if (!maisCapturas && ((peca.jogador === 1 && i === 0) || (peca.jogador === 2 && i === 7))) {
@@ -1298,14 +1389,15 @@ function criarTabuleiro() {
       //-------------------------------------------------------------------
       if (maisCapturas) {
         // Permanece na mesma peça para a próxima captura
-        pecaSelecionada = {i, j};
-        mostrarMovimentosPossiveis(i, j);
+        pecaSelecionada = {i, j, i0, j0}; // Armazena também a posição anterior
+        mostrarMovimentosPossiveis(i, j, i0, j0);
         destacarSelecionada(i, j);
 
         // Caso seja a IA, repetir a jogada automaticamente até não haver mais capturas
         if (ehIA) {
           setTimeout(() => {
-            let capturas = obterCapturasPossiveis(i, j);
+            // Passa posição anterior para bloquear direção oposta
+            let capturas = obterCapturasPossiveis(i, j, i0, j0);
             if (capturas.length > 0) {
               // Continua a jogada da IA com a mesma peça
               let proximaCaptura = capturas[Math.floor(Math.random() * capturas.length)];
