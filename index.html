@@ -564,6 +564,10 @@
            data-ad-format="auto"
            data-adtest="on"
            data-full-width-responsive="true"></ins>
+      <!-- Debug: Verificar se div existe -->
+      <div style="background: yellow; padding: 10px; margin: 10px; border: 2px solid red;">
+        <strong>DEBUG:</strong> Área de anúncios carregada. Se você vê isso, o HTML está funcionando.
+      </div>
     </div>    
   </div>
   <div id="modal-overlay" class="modal-overlay">
@@ -591,9 +595,12 @@
       
       // Inicializa anúncios do Google AdMob
       try {
+        console.log('Tentando carregar anúncios...');
+        console.log('adsbygoogle disponível:', typeof window.adsbygoogle);
         (adsbygoogle = window.adsbygoogle || []).push({});
+        console.log('Anúncios inicializados com sucesso');
       } catch (e) {
-        console.log('Erro ao carregar anúncio:', e);
+        console.error('Erro ao carregar anúncio:', e);
       }
     };
     // === PWA Instalação ===
