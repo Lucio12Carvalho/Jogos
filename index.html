@@ -560,7 +560,7 @@
     </div>
     <div id="tabuleiro" class="tabuleiro"></div>
     <h3 id="turno"></h3>
-    <div id="Anuncios" class="Anuncios">
+    <div id="Anuncios" class="Anuncios" style="display: none;">
       <!-- Anúncio do Google AdMob -->
       <ins class="adsbygoogle"
            style="display:block"
@@ -1205,6 +1205,13 @@
       const turnoElement = document.getElementById("turno");
       turnoElement.textContent = "Turno: Jogador " + turnoJogador;
       turnoElement.style.color = corPecas[turnoJogador];
+      
+      // Mostra a área de anúncios quando o jogo inicia
+      const anunciosElement = document.getElementById("Anuncios");
+      if (anunciosElement) {
+        anunciosElement.style.display = "block";
+      }
+      
       atualizarVisual();
       if (modo === "Contra a Máquina" && turnoJogador === 2) {
         jogadaDaIA();
@@ -1535,6 +1542,12 @@ function criarTabuleiro() {
       if (menu) menu.style.display = 'block';
       if (board) board.style.display = 'none';
       if (turno) turno.style.display = 'none';
+      
+      // Oculta a área de anúncios quando abre o menu
+      const anunciosElement = document.getElementById("Anuncios");
+      if (anunciosElement) {
+        anunciosElement.style.display = "none";
+      }
     }
 
     // Voltar ao Jogo: fecha menu e retorna ao tabuleiro mantendo estado
@@ -1545,6 +1558,12 @@ function criarTabuleiro() {
       if (menu) menu.style.display = 'none';
       if (board) board.style.display = 'grid';
       if (turno) turno.style.display = 'block';
+      
+      // Mostra a área de anúncios quando volta ao jogo
+      const anunciosElement = document.getElementById("Anuncios");
+      if (anunciosElement) {
+        anunciosElement.style.display = "block";
+      }
     }
 
     // Toca um som específico ao clicar em botões
