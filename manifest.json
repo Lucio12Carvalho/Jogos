@@ -1,11 +1,21 @@
 {
-  "name": "Jogo de Damas",
+  "name": "Jogo de Damas - Clássico",
   "short_name": "Damas",
+  "description": "Jogue damas clássico com IA inteligente e múltiplos níveis de dificuldade",
   "start_url": "./index.html",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#8B2500",
   "theme_color": "#8B2500",
+  "scope": "./",
+  "lang": "pt-BR",
+  "categories": ["games", "entertainment"],
   "icons": [
-    { "src": "icon.png.png", "sizes": "192x192", "type": "image/png" }
+    { "src": "icon.png.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon.png.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "screenshots": [
+    { "src": "image/Tela 01.jpeg", "sizes": "1280x720", "type": "image/jpeg" },
+    { "src": "image/Tela 2.jpeg", "sizes": "1280x720", "type": "image/jpeg" }
   ]
 }
