@@ -568,18 +568,21 @@
     <div id="tabuleiro" class="tabuleiro"></div>
     <h3 id="turno"></h3>
     <div id="Anuncios" class="Anuncios" style="display: none;">
-      <!-- Anúncio do Google AdMob -->
+      <!-- Anúncio Banner do Google AdMob -->
       <ins class="adsbygoogle"
            style="display:block"
            data-ad-client="ca-pub-9090639456230110"
            data-ad-slot="6220961510"
            data-ad-format="auto"
-           data-adtest="on"
            data-full-width-responsive="true"></ins>
-      <!-- Debug: Verificar se div existe -->
-      <div style="background: yellow; padding: 10px; margin: 10px; border: 2px solid red;">
-        <strong>DEBUG:</strong> Área de anúncios carregada. Se você vê isso, o HTML está funcionando.
-      </div>
+    </div>
+    
+    <!-- Anúncio Intersticial (Transição) - Oculto por padrão -->
+    <div id="anuncioIntersticial" style="display: none;">
+      <ins class="adsbygoogle"
+           data-ad-client="ca-pub-9090639456230110"
+           data-ad-slot="5888453862"
+           data-ad-format="interstitial"></ins>
     </div>    
   </div>
   <div id="modal-overlay" class="modal-overlay">
@@ -607,12 +610,16 @@
       
       // Inicializa anúncios do Google AdMob
       try {
-        console.log('Tentando carregar anúncios...');
-        console.log('adsbygoogle disponível:', typeof window.adsbygoogle);
         (adsbygoogle = window.adsbygoogle || []).push({});
-        console.log('Anúncios inicializados com sucesso');
       } catch (e) {
         console.error('Erro ao carregar anúncio:', e);
+      }
+      
+      // Inicializa anúncio intersticial
+      try {
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (e) {
+        console.error('Erro ao carregar anúncio intersticial:', e);
       }
     };
     // === PWA Instalação ===
@@ -1110,6 +1117,7 @@
         setTimeout(mostrarConfetes, 1800);
         setTimeout(() => {
           mostrarModalVitoria({ vencedor: 'IA' });
+          mostrarAnuncioIntersticial(); // Mostra anúncio quando IA vence
         }, 2500);
         return true;
       }
@@ -1122,6 +1130,7 @@
         setTimeout(mostrarConfetes, 1800);
         setTimeout(() => {
           mostrarModalVitoria({ vencedor: 'Você' });
+          mostrarAnuncioIntersticial(); // Mostra anúncio quando jogador vence
         }, 2500);
         return true;
       }
@@ -1570,6 +1579,26 @@ function criarTabuleiro() {
       const anunciosElement = document.getElementById("Anuncios");
       if (anunciosElement) {
         anunciosElement.style.display = "block";
+      }
+    }
+
+    // Mostra anúncio intersticial entre jogadas
+    function mostrarAnuncioIntersticial() {
+      try {
+        // 30% de chance de mostrar anúncio
+        if (Math.random() < 0.3) {
+          const anuncioIntersticial = document.getElementById('anuncioIntersticial');
+          if (anuncioIntersticial) {
+            anuncioIntersticial.style.display = 'block';
+            (adsbygoogle = window.adsbygoogle || []).push({});
+            // Oculta após 5 segundos
+            setTimeout(() => {
+              anuncioIntersticial.style.display = 'none';
+            }, 5000);
+          }
+        }
+      } catch (e) {
+        console.error('Erro ao mostrar anúncio intersticial:', e);
       }
     }
 
