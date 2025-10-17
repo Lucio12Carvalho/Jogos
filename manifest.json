@@ -17,5 +17,13 @@
   "screenshots": [
     { "src": "image/Tela 01.jpeg", "sizes": "1280x720", "type": "image/jpeg" },
     { "src": "image/Tela 2.jpeg", "sizes": "1280x720", "type": "image/jpeg" }
-  ]
+  ],
+  "permissions": [
+    "AD_ID"
+  ],
+  "features": [
+    "advertising"
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }
