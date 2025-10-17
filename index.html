@@ -1582,11 +1582,11 @@ function criarTabuleiro() {
       }
     }
 
-    // Mostra anúncio intersticial entre jogadas
+    // Mostra anúncio intersticial apenas ao final de uma partida completa
     function mostrarAnuncioIntersticial() {
       try {
-        // 30% de chance de mostrar anúncio
-        if (Math.random() < 0.3) {
+        // 50% de chance de mostrar anúncio ao final da partida
+        if (Math.random() < 0.5) {
           const anuncioIntersticial = document.getElementById('anuncioIntersticial');
           if (anuncioIntersticial) {
             anuncioIntersticial.style.display = 'block';
