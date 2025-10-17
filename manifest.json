@@ -2,7 +2,7 @@
   "name": "Jogo de Damas - Clássico",
   "short_name": "Damas",
   "description": "Jogue damas clássico com IA inteligente e múltiplos níveis de dificuldade",
-  "start_url": "/damas-github/index.html",
+  "start_url": "https://lucio12carvalho.github.io/Jogos//index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#8B2500",
