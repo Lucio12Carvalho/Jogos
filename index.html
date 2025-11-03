@@ -340,6 +340,9 @@
       overflow: hidden;
       touch-action: manipulation;
       backdrop-filter: blur(2px);
+      will-change: transform;
+      transform: translateZ(0);
+      contain: layout style paint;
     }
     .Anuncios {
       margin: 10px auto;
@@ -356,6 +359,8 @@
       z-index: 10;
       transition: transform 0.4s cubic-bezier(.4,2,.6,1);
       pointer-events: none;
+      will-change: transform;
+      transform: translateZ(0);
     }
     .casa {
       /* Estilo das casas do tabuleiro */
@@ -475,12 +480,12 @@
 </head>
 <body>
   <!-- Áudios -->
-  <audio id="som-captura" src="audio/captura.mp3"></audio>
-  <audio id="som-distribuicao" src="audio/distribuicao.mp3"></audio>
-  <audio id="som-movimento" src="audio/movimento.mp3"></audio>
-  <audio id="som-vitoria" src="audio/vitoria.mp3"></audio>
-  <audio id="som-click" src="audio/click.mp3"></audio>
-  <audio id="musica-fundo" src="audio/drama.mp3" loop></audio>
+  <audio id="som-captura" src="audio/captura.mp3" preload="none"></audio>
+  <audio id="som-distribuicao" src="audio/distribuicao.mp3" preload="none"></audio>
+  <audio id="som-movimento" src="audio/movimento.mp3" preload="none"></audio>
+  <audio id="som-vitoria" src="audio/vitoria.mp3" preload="none"></audio>
+  <audio id="som-click" src="audio/click.mp3" preload="none"></audio>
+  <audio id="musica-fundo" src="audio/drama.mp3" loop preload="metadata"></audio>
 
 
   
@@ -1311,7 +1316,8 @@ function animarDistribuicaoPecas() {
     void peca.offsetWidth;
     // Move para o centro da casa (escala normal)
     peca.style.transition = "transform 0.5s cubic-bezier(.4,2,.6,1)";
-    peca.style.transform = "translate(0,0) scale(1)";
+    peca.style.transform = "translate3d(0,0,0) scale(1)";
+    peca.style.willChange = "transform";
 
 
     // Remove a classe de animação após a transição
@@ -1323,6 +1329,7 @@ function animarDistribuicaoPecas() {
       peca.style.transition = "";
       peca.style.transform = "";
       peca.style.pointerEvents = "";
+      peca.style.willChange = "auto";
     }, { once: true });
 
     idx++;
@@ -1608,12 +1615,30 @@ function criarTabuleiro() {
       if (efeitosMutados && id !== 'musica-fundo') return;
       const audio = document.getElementById(id);
       if (audio) {
-        const vol = obterVolume();
-        audio.volume = vol;
-        audio.currentTime = 0;
-        const playPromise = audio.play();
-        if (playPromise && typeof playPromise.catch === 'function') {
-          playPromise.catch(() => {});
+        try {
+          const vol = obterVolume();
+          audio.volume = Math.max(0, Math.min(1, vol));
+          audio.currentTime = 0;
+          
+          // Preload do áudio se necessário
+          if (audio.readyState < 2) {
+            audio.load();
+          }
+          
+          const playPromise = audio.play();
+          if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch((error) => {
+              console.warn('Erro ao reproduzir áudio:', error);
+              // Fallback: tenta novamente após um pequeno delay
+              setTimeout(() => {
+                try {
+                  audio.play().catch(() => {});
+                } catch (e) {}
+              }, 100);
+            });
+          }
+        } catch (error) {
+          console.warn('Erro ao configurar áudio:', error);
         }
       }
     }
