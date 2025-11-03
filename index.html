@@ -1536,7 +1536,10 @@ function criarTabuleiro() {
         // Oculta o tabuleiro e o indicador de turno quando o menu está aberto
         if (board) board.style.display = 'none';
         if (turno) turno.style.display = 'none';
-        // Mantém estado de música conforme preferências
+        // Para a música quando o menu abre (tabuleiro fecha)
+        if (musica) {
+          musica.pause();
+        }
       } else {
         // Reexibe quando o menu é fechado
         if (board) board.style.display = 'grid';
@@ -1565,6 +1568,12 @@ function criarTabuleiro() {
       if (board) board.style.display = 'none';
       if (turno) turno.style.display = 'none';
       
+      // Para a música de fundo quando fecha o tabuleiro
+      const musica = document.getElementById('musica-fundo');
+      if (musica) {
+        musica.pause();
+      }
+      
       // Oculta a área de anúncios quando abre o menu
       const anunciosElement = document.getElementById("Anuncios");
       if (anunciosElement) {
@@ -1580,6 +1589,17 @@ function criarTabuleiro() {
       if (menu) menu.style.display = 'none';
       if (board) board.style.display = 'grid';
       if (turno) turno.style.display = 'block';
+      
+      // Retoma a música quando volta ao jogo (tabuleiro visível)
+      const musica = document.getElementById('musica-fundo');
+      if (musica) {
+        const vol = obterVolume();
+        const muteMusica = obterMuteMusica();
+        musica.volume = vol;
+        if (!muteMusica && vol > 0) {
+          musica.play().catch(() => {});
+        }
+      }
       
       // Mostra a área de anúncios quando volta ao jogo
       const anunciosElement = document.getElementById("Anuncios");
@@ -1725,7 +1745,10 @@ function criarTabuleiro() {
         salvarVolume(vol);
         if (musica){
           musica.volume = vol;
-          if (!chkMusica.checked && vol > 0) {
+          // Só toca a música se o tabuleiro estiver visível
+          const board = document.getElementById('tabuleiro');
+          const tabuleiroVisivel = board && board.style.display !== 'none' && board.style.display !== '';
+          if (!chkMusica.checked && vol > 0 && tabuleiroVisivel) {
             musica.play().catch(()=>{});
           } else {
             musica.pause();
@@ -1736,7 +1759,11 @@ function criarTabuleiro() {
       btnMais.onclick = () => { vol = Math.min(1, +(vol + 0.1).toFixed(2)); label.textContent = Math.round(vol*100)+'%'; aplicar(); };
       chkMusica.onchange = () => { salvarMuteMusica(chkMusica.checked); aplicar(); };
       chkEfeitos.onchange = () => { salvarMuteEfeitos(chkEfeitos.checked); };
-      aplicar();
+      // Não toca a música automaticamente ao iniciar - apenas configura o volume
+      if (musica) {
+        musica.volume = vol;
+        musica.pause(); // Garante que a música está pausada ao iniciar
+      }
     }
 
     // ======= Prévia do tabuleiro =======
