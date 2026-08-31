@@ -133,3 +133,4 @@ Consulte `GUIA_PWA_BUILDER.md` para instruções detalhadas.
 
 🎮 **Divirta-se jogando!** ♟️
 
+

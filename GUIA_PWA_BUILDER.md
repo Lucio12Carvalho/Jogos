@@ -50,3 +50,4 @@
 - **Erro de service worker**: Verifique se o sw.js está no caminho correto
 - **Erro de ícones**: Garanta que os ícones estão acessíveis e nos tamanhos corretos
 
+
